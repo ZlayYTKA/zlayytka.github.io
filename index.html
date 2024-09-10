@@ -38,11 +38,10 @@
         document.getElementById('fullname').textContent = user.first_name + ' ' + (user.last_name || '');
         document.getElementById('language_code').textContent = user.language_code;
         document.getElementById('is_premium').textContent = user.is_premium ? 'Да' : 'Нет';
-        fetch('https://9d95-31-129-105-188.ngrok-free.app/webapp_data', {
+        fetch('https://nothingcube-backend.onrender.com/webapp_data', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'ngrok-skip-browser-warning': 'true'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 initData: window.Telegram.WebApp.initData
