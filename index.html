@@ -13,51 +13,60 @@
         h2 {
             margin-top: 50px;
         }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007BFF;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <h2>Это лишь заглушка</h2>
     <p id="auth-status">Проверка авторизации...</p>
-    <button id="check-auth">Проверить авторизацию</button>
-
+    <button id="send-fake-data">Отправить фейковые данные</button>
     <script>
         Telegram.WebApp.ready();
 
-        document.getElementById('check-auth').addEventListener('click', function() {
-            const initData = Telegram.WebApp.initData || '';
-            const hashStr = Telegram.WebApp.initDataUnsafe?.hash || '';
+        const initData = Telegram.WebApp.initData || '';
+        const hashStr = Telegram.WebApp.initDataUnsafe.hash || '';
 
+        fetch('https://nothingcube-backend.onrender.com/auth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ init_data: initData, hash: hashStr })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.authorized) {
+                document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
+            } else {
+                document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при авторизации:', error);
+            document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
+        });
+        document.getElementById('send-fake-data').addEventListener('click', function() {
+            const fakeInitData = 'fake=init&data=example';
+            const fakeHash = 'fakehashvalue';
+        
             fetch('https://nothingcube-backend.onrender.com/auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ init_data: initData, hash: hashStr })
+                body: JSON.stringify({ init_data: fakeInitData, hash: fakeHash })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.authorized) {
-                    document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
+                    document.getElementById('auth-status').innerText = 'Фейковые данные приняты как авторизованные';
                 } else {
-                    document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
+                    document.getElementById('auth-status').innerText = 'Фейковые данные не авторизованы';
                 }
             })
             .catch(error => {
-                console.error('Ошибка при авторизации:', error);
-                document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
+                console.error('Ошибка при отправке фейковых данных:', error);
+                document.getElementById('auth-status').innerText = 'Ошибка при проверке фейковых данных';
             });
         });
     </script>
