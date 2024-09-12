@@ -56,6 +56,34 @@
             document.getElementById('auth-status').textContent = 'Ошибка при проверке авторизации.';
             console.error('Ошибка:', error);
         });
+        function sendFakeData() {
+            const fakeInitData = window.Telegram.WebApp.initData.replace(/user_id=\d+/, 'user_id=123456789');
+            fetch('https://nothingcube-backend.onrender.com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query_id: 'fake_query_id',
+                    user: { id: 123456789, username: 'fake_user' },
+                    initData: fakeInitData  // Подмененные данные
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Ответ сервера для фейковых данных:', data);
+                document.getElementById('auth-status').textContent = data.success ? 'Фейковая авторизация пройдена' : 'Фейковая авторизация не пройдена';
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке фейковых данных:', error);
+            });
+        }
+
+        // Добавляем кнопку для отправки фейковых данных
+        const button = document.createElement('button');
+        button.textContent = 'Тестировать с фейковыми данными';
+        button.onclick = sendFakeData;
+        document.body.appendChild(button);
     </script>
 </body>
 </html>
