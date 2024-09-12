@@ -44,20 +44,18 @@
         document.getElementById('language_code').textContent = user.language_code;
         document.getElementById('is_premium').textContent = user.is_premium ? 'Да' : 'Нет';
 
-        console.log('initData:', window.Telegram.WebApp.initData);
+        const initData = window.Telegram.WebApp.initData;
+        console.log('initData:', initData);
 
         fetch('https://nothingcube-backend.onrender.com/webapp_data', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                initData: window.Telegram.WebApp.initData
-            })
+            body: JSON.stringify({ initData })
         })
         .then(response => {
             console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
             return response.json();
         })
         .then(data => {
