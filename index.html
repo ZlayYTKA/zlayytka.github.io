@@ -49,7 +49,8 @@
 
         // Отправка данных на бекенд
         const data = tg.initData;
-        fetch('https://nothingcube-backend.onrender.com/validate', {
+        console.log('Отправляемые данные:', data);
+                fetch('https://nothingcube-backend.onrender.com/validate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -58,6 +59,7 @@
         })
         .then(response => response.json())
         .then(result => {
+            console.log('Ответ сервера:', result);  // Добавим лог ответа сервера для отладки
             if (result.success) {
                 document.getElementById('auth_status').textContent = 'Авторизация успешна';
             } else {
@@ -65,6 +67,7 @@
             }
         })
         .catch(error => {
+            console.error('Ошибка запроса:', error);  // Лог ошибок
             document.getElementById('auth_status').textContent = 'Ошибка соединения';
         });
     </script>
