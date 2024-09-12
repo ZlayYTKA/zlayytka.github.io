@@ -7,12 +7,9 @@
     <style>
         body {
             background-color: #1C2036;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             color: white;
             font-family: Arial, sans-serif;
+            padding: 20px;
         }
         h2 {
             text-align: center;
@@ -21,18 +18,24 @@
             color: red;
             margin-top: 20px;
         }
+        #debug-info {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div>
-        <h2>Это лишь заглушка на время написания бека1</h2>
+        <h2>Это лишь заглушка на время написания бека</h2>
         <p>Ваш user_id: <span id="user_id"></span></p>
         <p>Ваш username: <span id="username"></span></p>
         <p>Ваше имя: <span id="fullname"></span></p>
         <p>Язык аккаунта: <span id="language_code"></span></p>
         <p>Есть ли у вас тг премиум: <span id="is_premium"></span></p>
         <div id="error-message"></div>
+        <pre id="debug-info"></pre>
     </div>
 
     <script>
@@ -65,6 +68,11 @@
             } else {
                 console.error('Ошибка проверки данных на сервере:', data.message);
                 document.getElementById('error-message').textContent = 'Ошибка: ' + data.message;
+            }
+
+            // Display debug info
+            if (data.debug_info) {
+                document.getElementById('debug-info').textContent = JSON.stringify(data.debug_info, null, 2);
             }
         })
         .catch((error) => {
