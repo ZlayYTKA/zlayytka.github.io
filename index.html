@@ -19,7 +19,6 @@
 <body>
     <h2>Это лишь заглушка</h2>
     <p id="auth-status">Проверка авторизации...</p>
-    <button id="send-fake-data">Отправить фейковые данные</button>
     <script>
         Telegram.WebApp.ready();
 
@@ -44,30 +43,6 @@
         .catch(error => {
             console.error('Ошибка при авторизации:', error);
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
-        });
-        document.getElementById('send-fake-data').addEventListener('click', function() {
-            const fakeInitData = 'fake=init&data=example';
-            const fakeHash = 'fakehashvalue';
-        
-            fetch('https://nothingcube-backend.onrender.com/auth', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ init_data: fakeInitData, hash: fakeHash })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.authorized) {
-                    document.getElementById('auth-status').innerText = 'Фейковые данные приняты как авторизованные';
-                } else {
-                    document.getElementById('auth-status').innerText = 'Фейковые данные не авторизованы';
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при отправке фейковых данных:', error);
-                document.getElementById('auth-status').innerText = 'Ошибка при проверке фейковых данных';
-            });
         });
     </script>
 </body>
