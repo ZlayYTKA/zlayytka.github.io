@@ -1,84 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
+    <title>Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #1C2036;
-            color: white;
             font-family: Arial, sans-serif;
+            margin: 0;
             padding: 20px;
+            background-color: #f0f2f5;
         }
-        h2 {
-            text-align: center;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        #error-message {
-            color: red;
-            margin-top: 20px;
+        h1 {
+            color: #0088cc;
         }
-        #debug-info {
-            margin-top: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        .info {
+            margin-bottom: 10px;
+        }
+        .label {
+            font-weight: bold;
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div>
-        <h2>Это лишь заглушка на время написания бека</h2>
-        <p>Ваш user_id: <span id="user_id"></span></p>
-        <p>Ваш username: <span id="username"></span></p>
-        <p>Ваше имя: <span id="fullname"></span></p>
-        <p>Язык аккаунта: <span id="language_code"></span></p>
-        <p>Есть ли у вас тг премиум: <span id="is_premium"></span></p>
-        <div id="error-message"></div>
-        <pre id="debug-info"></pre>
+    <div class="container">
+        <h1>Информация о пользователе</h1>
+        <div id="userInfo"></div>
+        <div id="authStatus" class="info"></div>
     </div>
 
     <script>
-        window.Telegram.WebApp.ready();
-        const user = window.Telegram.WebApp.initDataUnsafe.user;
-        document.getElementById('user_id').textContent = user.id;
-        document.getElementById('username').textContent = user.username;
-        document.getElementById('fullname').textContent = user.first_name + ' ' + (user.last_name || '');
-        document.getElementById('language_code').textContent = user.language_code;
-        document.getElementById('is_premium').textContent = user.is_premium ? 'Да' : 'Нет';
+        const tg = window.Telegram.WebApp;
 
-        const initData = window.Telegram.WebApp.initData;
-        console.log('initData:', initData);
+        function sendUserData() {
+            const userData = {
+                user_id: tg.initDataUnsafe.user.id,
+                username: tg.initDataUnsafe.user.username,
+                full_name: tg.initDataUnsafe.user.first_name + ' ' + (tg.initDataUnsafe.user.last_name || ''),
+                language_code: tg.initDataUnsafe.user.language_code,
+                is_premium: tg.initDataUnsafe.user.is_premium || false,
+                initData: tg.initData
+            };
 
-        fetch('https://nothingcube-backend.onrender.com/webapp_data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ initData })
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data);
-            if (data.status === 'success') {
-                console.log('Данные успешно отправлены и проверены сервером');
-            } else {
-                console.error('Ошибка проверки данных на сервере:', data.message);
-                document.getElementById('error-message').textContent = 'Ошибка: ' + data.message;
-            }
+            fetch('https://nothingcube-backend.onrender.com/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayUserInfo(userData, data.is_valid);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayUserInfo(userData, false);
+            });
+        }
 
-            // Display debug info
-            if (data.debug_info) {
-                document.getElementById('debug-info').textContent = JSON.stringify(data.debug_info, null, 2);
-            }
-        })
-        .catch((error) => {
-            console.error('Ошибка:', error);
-            document.getElementById('error-message').textContent = 'Ошибка: ' + error.message;
-        });
+        function displayUserInfo(userData, isValid) {
+            const userInfoDiv = document.getElementById('userInfo');
+            userInfoDiv.innerHTML = `
+                <div class="info"><span class="label">User ID:</span> ${userData.user_id}</div>
+                <div class="info"><span class="label">Username:</span> ${userData.username || 'Не указан'}</div>
+                <div class="info"><span class="label">Full Name:</span> ${userData.full_name}</div>
+                <div class="info"><span class="label">Language Code:</span> ${userData.language_code}</div>
+                <div class="info"><span class="label">Premium:</span> ${userData.is_premium ? 'Да' : 'Нет'}</div>
+            `;
+
+            const authStatusDiv = document.getElementById('authStatus');
+            authStatusDiv.innerHTML = `<span class="label">Прошли ли вы авторизацию:</span> ${isValid ? 'Да' : 'Нет'}`;
+        }
+
+        tg.expand();
+        sendUserData();
     </script>
 </body>
 </html>
