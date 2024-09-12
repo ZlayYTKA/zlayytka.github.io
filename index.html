@@ -19,7 +19,7 @@
             .then(response => response.json())
             .then(data => {
                 console.log("Ответ сервера:", data);
-                document.getElementById('auth-result').innerText = data.authenticated ? 'Авторизация пройдена' : 'Авторизация не пройдена';
+                document.getElementById('auth-result').innerText = data.success ? 'Авторизация пройдена' : 'Авторизация не пройдена';
             })
             .catch(error => console.error('Ошибка запроса:', error));
         }
