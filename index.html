@@ -3,76 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        .container {
-            display: inline-block;
-            text-align: left;
-            border: 1px solid #ccc;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .status {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-    </style>
+    <title>Telegram MiniApp</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Добро пожаловать!</h1>
-        <p>Ваш Telegram ID: <span id="user_id"></span></p>
-        <p>Ваше имя: <span id="fullname"></span></p>
-        <p>Логин: <span id="username"></span></p>
-        <p>Язык интерфейса: <span id="language_code"></span></p>
-        <p>Премиум статус: <span id="is_premium"></span></p>
-        <p class="status">Проверка авторизации: <span id="auth_status"></span></p>
-    </div>
+    <h1>Проверка авторизации</h1>
+    <p id="auth_status">Статус авторизации: неизвестен</p>
 
     <script>
-        // Получение данных из Telegram WebApp
         const tg = window.Telegram.WebApp;
-        const user = tg.initDataUnsafe.user;
+        const initData = tg.initData;
+        console.log('Отправляемые данные:', initData);
 
-        // Отображение данных на странице
-        document.getElementById('user_id').textContent = user.id;
-        document.getElementById('fullname').textContent = `${user.first_name} ${user.last_name || ''}`;
-        document.getElementById('username').textContent = user.username || 'Не указано';
-        document.getElementById('language_code').textContent = user.language_code;
-        document.getElementById('is_premium').textContent = user.is_premium ? 'Да' : 'Нет';
-
-        // Отправка данных на бекенд
-        const data = tg.initData;
-        console.log('Отправляемые данные:', data);
-
-        const params = new URLSearchParams(data);
-        const dataForHash = Array.from(params.entries())
-            .filter(([key]) => key !== 'hash')  // Убираем hash из данных
-            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))  // Сортируем ключи
-            .map(([key, value]) => `${key}=${value}`)  // Формируем строку key=value
-            .join('\n');  // Соединяем с переносом строки
-        console.log('Строка для хэширования:', dataForHash);
         fetch('https://nothingcube-backend.onrender.com/validate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: `initData=${encodeURIComponent(data)}`
+            body: `initData=${encodeURIComponent(initData)}`
         })
         .then(response => response.json())
         .then(result => {
-            console.log('Ответ сервера:', result);  // Лог ответа сервера
-            if (result.success) {
-                document.getElementById('auth_status').textContent = 'Авторизация успешна';
-            } else {
-                document.getElementById('auth_status').textContent = 'Авторизация не пройдена';
-            }
+            console.log('Ответ сервера:', result);
+            document.getElementById('auth_status').textContent = result.success ? 'Авторизация успешна' : 'Авторизация не пройдена';
         })
         .catch(error => {
             console.error('Ошибка запроса:', error);
