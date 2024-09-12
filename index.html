@@ -29,6 +29,10 @@
         .label {
             font-weight: bold;
         }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +40,7 @@
         <h1>Информация о пользователе</h1>
         <div id="userInfo"></div>
         <div id="authStatus" class="info"></div>
+        <div id="error"></div>
     </div>
 
     <script>
@@ -51,6 +56,8 @@
                 initData: tg.initData
             };
 
+            console.log("Sending user data:", userData);
+
             fetch('https://nothingcube-backend.onrender.com/validate', {
                 method: 'POST',
                 headers: {
@@ -58,12 +65,19 @@
                 },
                 body: JSON.stringify(userData),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log("Received response:", data);
                 displayUserInfo(userData, data.is_valid);
             })
             .catch(error => {
                 console.error('Error:', error);
+                document.getElementById('error').textContent = `Ошибка: ${error.message}`;
                 displayUserInfo(userData, false);
             });
         }
@@ -76,6 +90,7 @@
                 <div class="info"><span class="label">Full Name:</span> ${userData.full_name}</div>
                 <div class="info"><span class="label">Language Code:</span> ${userData.language_code}</div>
                 <div class="info"><span class="label">Premium:</span> ${userData.is_premium ? 'Да' : 'Нет'}</div>
+                <div class="info"><span class="label">Init Data:</span> ${userData.initData}</div>
             `;
 
             const authStatusDiv = document.getElementById('authStatus');
