@@ -31,33 +31,59 @@
 <body>
     <h2>Это лишь заглушка</h2>
     <p id="auth-status">Проверка авторизации...</p>
-    <button id="check-auth">Проверить авторизацию</button>
+    <button id="send-fake-data">Отправить фейковые данные</button>
 
     <script>
         Telegram.WebApp.ready();
 
-        document.getElementById('check-auth').addEventListener('click', function() {
-            const initData = Telegram.WebApp.initData || '';
-            const hashStr = Telegram.WebApp.initDataUnsafe?.hash || '';
+        // Автоматическая проверка авторизации при загрузке
+        const initData = Telegram.WebApp.initData || '';
+        const hashStr = Telegram.WebApp.initDataUnsafe?.hash || '';
 
+        fetch('https://nothingcube-backend.onrender.com/auth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ init_data: initData, hash: hashStr })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.authorized) {
+                document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
+            } else {
+                document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при авторизации:', error);
+            document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
+        });
+
+        // Обработчик нажатия на кнопку
+        document.getElementById('send-fake-data').addEventListener('click', function() {
+            // Отправляем фейковые данные
             fetch('https://nothingcube-backend.onrender.com/auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ init_data: initData, hash: hashStr })
+                body: JSON.stringify({
+                    init_data: 'fake_data',
+                    hash: 'fake_hash'
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.authorized) {
-                    document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
+                    document.getElementById('auth-status').innerText = 'Фейковые данные приняты как авторизованные';
                 } else {
-                    document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
+                    document.getElementById('auth-status').innerText = 'Фейковые данные не авторизованы';
                 }
             })
             .catch(error => {
-                console.error('Ошибка при авторизации:', error);
-                document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
+                console.error('Ошибка при отправке фейковых данных:', error);
+                document.getElementById('auth-status').innerText = 'Ошибка при отправке фейковых данных';
             });
         });
     </script>
