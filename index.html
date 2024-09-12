@@ -17,6 +17,10 @@
         h2 {
             text-align: center;
         }
+        #error-message {
+            color: red;
+            margin-top: 20px;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -28,6 +32,7 @@
         <p>Ваше имя: <span id="fullname"></span></p>
         <p>Язык аккаунта: <span id="language_code"></span></p>
         <p>Есть ли у вас тг премиум: <span id="is_premium"></span></p>
+        <div id="error-message"></div>
     </div>
 
     <script>
@@ -39,7 +44,6 @@
         document.getElementById('language_code').textContent = user.language_code;
         document.getElementById('is_premium').textContent = user.is_premium ? 'Да' : 'Нет';
 
-        // Логируем initData перед отправкой
         console.log('initData:', window.Telegram.WebApp.initData);
 
         fetch('https://nothingcube-backend.onrender.com/webapp_data', {
@@ -54,23 +58,20 @@
         .then(response => {
             console.log('Response status:', response.status);
             console.log('Response headers:', response.headers);
-            return response.text();  // Изменено с response.json() на response.text()
+            return response.json();
         })
-        .then(text => {
-            console.log('Response text:', text);
-            try {
-                const data = JSON.parse(text);
-                if (data.status === 'success') {
-                    console.log('Данные успешно отправлены и проверены сервером');
-                } else {
-                    console.error('Ошибка проверки данных на сервере:', data.message);
-                }
-            } catch (error) {
-                console.error('Ошибка при парсинге JSON:', error);
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.status === 'success') {
+                console.log('Данные успешно отправлены и проверены сервером');
+            } else {
+                console.error('Ошибка проверки данных на сервере:', data.message);
+                document.getElementById('error-message').textContent = 'Ошибка: ' + data.message;
             }
         })
         .catch((error) => {
             console.error('Ошибка:', error);
+            document.getElementById('error-message').textContent = 'Ошибка: ' + error.message;
         });
     </script>
 </body>
