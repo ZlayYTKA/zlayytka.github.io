@@ -38,6 +38,7 @@
         document.getElementById('fullname').textContent = user.first_name + ' ' + (user.last_name || '');
         document.getElementById('language_code').textContent = user.language_code;
         document.getElementById('is_premium').textContent = user.is_premium ? 'Да' : 'Нет';
+
         fetch('https://nothingcube-backend.onrender.com/webapp_data', {
             method: 'POST',
             headers: {
@@ -47,12 +48,17 @@
                 initData: window.Telegram.WebApp.initData
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 console.log('Данные успешно отправлены и проверены сервером');
             } else {
-                console.error('Ошибка проверки данных на сервере');
+                console.error('Ошибка проверки данных на сервере:', data.message);
             }
         })
         .catch((error) => {
