@@ -24,9 +24,11 @@
     <script>
         window.Telegram.WebApp.ready();
 
-        // Получение initData и отправка на сервер
-        const initData = window.Telegram.WebApp.initData;
+        // Получаем данные initData
+        const initData = window.Telegram.WebApp.initData || '';
         const initDataUnsafe = window.Telegram.WebApp.initDataUnsafe || {};
+        console.log('initData:', initData);
+        console.log('initDataUnsafe:', initDataUnsafe);
 
         fetch('https://nothingcube-backend.onrender.com', {
             method: 'POST',
@@ -35,12 +37,15 @@
             },
             body: JSON.stringify({
                 query_id: initDataUnsafe.query_id || '',
-                user: initDataUnsafe.user || {}
+                user: initDataUnsafe.user || {},
+                initData: initData  // Отправляем initData на сервер
             })
         })
         .then(response => response.json())
         .then(data => {
             const statusElement = document.getElementById('auth-status');
+            console.log('Server response:', data);
+
             if (data.success) {
                 statusElement.textContent = 'Авторизация пройдена!';
             } else {
