@@ -12,16 +12,16 @@
             fetch('https://nothingcube-backend.onrender.com/validate', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json'  // Убедитесь, что данные отправляются как JSON
                 },
-                body: JSON.stringify(initData)
+                body: JSON.stringify(initData)  // Преобразуем объект в JSON-строку
             })
             .then(response => response.json())
             .then(data => {
                 console.log("Ответ сервера:", data);
                 document.getElementById('auth-result').innerText = data.authenticated ? 'Авторизация пройдена' : 'Авторизация не пройдена';
             })
-            .catch(error => console.error('Ошибка:', error));
+            .catch(error => console.error('Ошибка запроса:', error));
         }
 
         window.onload = function() {
