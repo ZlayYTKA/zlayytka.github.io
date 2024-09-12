@@ -60,9 +60,7 @@
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
         });
 
-        // Обработчик нажатия на кнопку
         document.getElementById('send-fake-data').addEventListener('click', function() {
-            // Отправляем фейковые данные
             fetch('https://nothingcube-backend.onrender.com/auth', {
                 method: 'POST',
                 headers: {
@@ -73,12 +71,19 @@
                     hash: 'fake_hash'
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.authorized) {
-                    document.getElementById('auth-status').innerText = 'Фейковые данные приняты как авторизованные';
-                } else {
-                    document.getElementById('auth-status').innerText = 'Фейковые данные не авторизованы';
+            .then(response => response.text())  // Сначала получаем текст
+            .then(text => {
+                console.log('Response text:', text);  // Выводим текст ответа в консоль
+                try {
+                    const data = JSON.parse(text);  // Пробуем преобразовать текст в JSON
+                    if (data.authorized) {
+                        document.getElementById('auth-status').innerText = 'Фейковые данные приняты как авторизованные';
+                    } else {
+                        document.getElementById('auth-status').innerText = 'Фейковые данные не авторизованы';
+                    }
+                } catch (error) {
+                    console.error('Ошибка при преобразовании ответа:', error);
+                    document.getElementById('auth-status').innerText = 'Ошибка при обработке ответа сервера';
                 }
             })
             .catch(error => {
