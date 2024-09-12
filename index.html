@@ -3,34 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <title>Telegram MiniApp</title>
+    <script>
+        function sendDataToServer(initData) {
+            console.log("Отправляемые данные:", initData);
+
+            fetch('https://nothingcube-backend.onrender.com/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(initData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Ответ сервера:", data);
+                document.getElementById('auth-result').innerText = data.authenticated ? 'Авторизация пройдена' : 'Авторизация не пройдена';
+            })
+            .catch(error => console.error('Ошибка:', error));
+        }
+
+        window.onload = function() {
+            const initData = window.Telegram.WebApp.initDataUnsafe;
+            sendDataToServer(initData);
+        };
+    </script>
 </head>
 <body>
-    <h1>Проверка авторизации</h1>
-    <p id="auth_status">Статус авторизации: неизвестен</p>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        const initData = tg.initData;
-        console.log('Отправляемые данные:', initData);
-
-        fetch('https://nothingcube-backend.onrender.com/validate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: `initData=${encodeURIComponent(initData)}`
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log('Ответ сервера:', result);
-            document.getElementById('auth_status').textContent = result.success ? 'Авторизация успешна' : 'Авторизация не пройдена';
-        })
-        .catch(error => {
-            console.error('Ошибка запроса:', error);
-            document.getElementById('auth_status').textContent = 'Ошибка соединения';
-        });
-    </script>
+    <h1>Добро пожаловать в мини-приложение!</h1>
+    <p id="auth-result">Проверка авторизации...</p>
 </body>
 </html>
