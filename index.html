@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini App</title>
+    <title>Тест Telegram WebApp</title>
     <style>
         body {
             background-color: #565560;
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
-        }
-        h2 {
-            margin-top: 20px;
         }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -22,64 +19,59 @@
     <p id="auth-status">Проверка авторизации...</p>
 
     <script>
-        window.Telegram.WebApp.ready();
+        // Отправляем реальные данные на сервер при загрузке страницы
+        const initData = window.Telegram.WebApp.initData;
+        const initDataUnsafe = window.Telegram.WebApp.initDataUnsafe;
 
-        // Получаем данные initData
-        const initData = window.Telegram.WebApp.initData || '';
-        const initDataUnsafe = window.Telegram.WebApp.initDataUnsafe || {};
-        console.log('initData:', initData);
-        console.log('initDataUnsafe:', initDataUnsafe);
-
-        fetch('https://nothingcube-backend.onrender.com', {
+        // Отправка данных на сервер
+        fetch('https://nothingcube-backend.onrender.com/validate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                query_id: initDataUnsafe.query_id || '',
-                user: initDataUnsafe.user || {},
-                initData: initData  // Отправляем initData на сервер
+                query_id: initDataUnsafe.query_id,
+                user: initDataUnsafe.user,
+                initData: initData
             })
         })
         .then(response => response.json())
         .then(data => {
-            const statusElement = document.getElementById('auth-status');
-            console.log('Server response:', data);
-
-            if (data.success) {
-                statusElement.textContent = 'Авторизация пройдена!';
-            } else {
-                statusElement.textContent = 'Авторизация не пройдена.';
-            }
+            document.getElementById('auth-status').textContent = data.success ? 'Авторизация пройдена!' : 'Авторизация не пройдена!';
+            console.log('Ответ сервера:', data);
         })
         .catch(error => {
-            document.getElementById('auth-status').textContent = 'Ошибка при проверке авторизации.';
+            document.getElementById('auth-status').textContent = 'Ошибка авторизации';
             console.error('Ошибка:', error);
         });
+
+        // Функция для отправки фейковых данных
         function sendFakeData() {
-            const fakeInitData = window.Telegram.WebApp.initData.replace(/user_id=\d+/, 'user_id=123456789');
-            fetch('https://nothingcube-backend.onrender.com', {
+            const fakeInitData = initData.replace(/user_id=\d+/, 'user_id=123456789');
+
+            fetch('https://nothingcube-backend.onrender.com/validate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    query_id: 'fake_query_id',
+                    query_id: initDataUnsafe.query_id,
                     user: { id: 123456789, username: 'fake_user' },
-                    initData: fakeInitData  // Подмененные данные
+                    initData: fakeInitData
                 })
             })
             .then(response => response.json())
             .then(data => {
+                document.getElementById('auth-status').textContent = data.success ? 'Фейковая авторизация пройдена!' : 'Фейковая авторизация не пройдена!';
                 console.log('Ответ сервера для фейковых данных:', data);
-                document.getElementById('auth-status').textContent = data.success ? 'Фейковая авторизация пройдена' : 'Фейковая авторизация не пройдена';
             })
             .catch(error => {
-                console.error('Ошибка при отправке фейковых данных:', error);
+                document.getElementById('auth-status').textContent = 'Ошибка авторизации с фейковыми данными';
+                console.error('Ошибка:', error);
             });
         }
 
-        // Добавляем кнопку для отправки фейковых данных
+        // Добавляем кнопку для фейковой проверки
         const button = document.createElement('button');
         button.textContent = 'Тестировать с фейковыми данными';
         button.onclick = sendFakeData;
