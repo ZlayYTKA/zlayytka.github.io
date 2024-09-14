@@ -36,8 +36,15 @@
         .then(data => {
             if (data.authorized) {
                 document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
+                console.log("Аутентификация успешна!");
+                console.log("Данные пользователя:");
+                console.log("Nickname:", data.nickname);
+                console.log("Is Banned:", data.is_banned);
+                console.log("Coins:", data.coins);
+                console.log("Dices:", data.dices);
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
+                console.log("Ошибка аутентификации");
             }
         })
         .catch(error => {
