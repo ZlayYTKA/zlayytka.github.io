@@ -42,6 +42,14 @@
                 console.log("Is Banned:", data.is_banned);
                 console.log("Coins:", data.coins);
                 console.log("Dices:", data.dices);
+                console.log("JWT:", data.access_token);
+
+                // Display user info
+                document.getElementById('nickname').textContent = data.nickname;
+                document.getElementById('is-banned').textContent = data.is_banned;
+                document.getElementById('coins').textContent = data.coins;
+                document.getElementById('dices').textContent = data.dices;
+                document.getElementById('user-info').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
