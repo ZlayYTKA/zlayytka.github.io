@@ -6,9 +6,10 @@
     <title>Telegram Web App</title>
     <style>
         body {
-            background-color: #565560;
-            color: white;
+            color: var(--tg-theme-text-color, white);
+            background-color: var(--tg-theme-bg-color, #565560);
             text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         h2 {
             margin-top: 50px;
@@ -42,6 +43,8 @@
                 console.log("Is Banned:", data.is_banned);
                 console.log("Coins:", data.coins);
                 console.log("Dices:", data.dices);
+                // TODO - Удалить
+                console.log("JWT Token:", data.token);
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
@@ -51,6 +54,18 @@
             console.error('Ошибка при авторизации:', error);
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
         });
+
+        // Функция для обновления темы
+        function updateTheme() {
+            document.body.style.backgroundColor = Telegram.WebApp.colorScheme === 'dark' ? '#2f3136' : '#ffffff';
+            document.body.style.color = Telegram.WebApp.colorScheme === 'dark' ? '#ffffff' : '#000000';
+        }
+
+        // Установка начальной темы
+        updateTheme();
+
+        // Обновление темы при ее изменении в Telegram
+        Telegram.WebApp.onEvent('themeChanged', updateTheme);
     </script>
 </body>
 </html>
