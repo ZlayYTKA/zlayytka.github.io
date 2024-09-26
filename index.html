@@ -3,27 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Telegram Mini App</title>
     <style>
         body {
-            background-color: #565560;
-            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-theme {
+            background-color: #1E1E1E;
+            color: #FFFFFF;
+        }
+        body.light-theme {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+        .container {
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
+            transition: background-color 0.3s;
+        }
+        .dark-theme .container {
+            background-color: #2C2C2C;
+        }
+        .light-theme .container {
+            background-color: #F0F2F5;
         }
         h2 {
-            margin-top: 50px;
+            color: #0088cc;
+        }
+        .user-info {
+            margin-top: 1rem;
+        }
+        .user-info p {
+            margin: 0.5rem 0;
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <h2>Это лишь заглушка</h2>
-    <p id="auth-status">Проверка авторизации...</p>
-    <script>
-        Telegram.WebApp.ready();
+    <div class="container">
+        <h2>Это лишь заглушка</h2>
+        <div id="authStatus">Проверка авторизации...</div>
+        <div id="userInfo" class="user-info"></div>
+    </div>
 
-        const initData = Telegram.WebApp.initData || '';
-        const hashStr = Telegram.WebApp.initDataUnsafe.hash || '';
+    <script>
+        const tg = window.Telegram.WebApp;
+        const initData = tg.initData;
+        const hashStr = tg.initDataUnsafe.hash;
+
+        // Set theme
+        function setTheme() {
+            document.body.className = tg.colorScheme === 'dark' ? 'dark-theme' : 'light-theme';
+        }
+        setTheme();
+        tg.onEvent('themeChanged', setTheme);
 
         fetch('https://nothingcube-backend.onrender.com/auth', {
             method: 'POST',
@@ -34,22 +75,27 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log('User Info:', data);
+
+            const authStatusDiv = document.getElementById('authStatus');
+            const userInfoDiv = document.getElementById('userInfo');
+
             if (data.authorized) {
-                document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
-                console.log("Аутентификация успешна!");
-                console.log("Данные пользователя:");
-                console.log("Nickname:", data.nickname);
-                console.log("Is Banned:", data.is_banned);
-                console.log("Coins:", data.coins);
-                console.log("Dices:", data.dices);
+                authStatusDiv.textContent = 'Авторизация успешна';
+                userInfoDiv.innerHTML = `
+                    <p><strong>Nickname:</strong> ${data.nickname}</p>
+                    <p><strong>Banned:</strong> ${data.is_banned ? 'Yes' : 'No'}</p>
+                    <p><strong>Coins:</strong> ${data.coins}</p>
+                    <p><strong>Dices:</strong> ${data.dices}</p>
+                    <p><strong>Access Token:</strong> ${data.access_token}</p>
+                `;
             } else {
-                document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
-                console.log("Ошибка аутентификации");
+                authStatusDiv.textContent = 'Ошибка авторизации';
             }
         })
         .catch(error => {
-            console.error('Ошибка при авторизации:', error);
-            document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
+            console.error('Error:', error);
+            document.getElementById('authStatus').textContent = 'Ошибка при проверке авторизации';
         });
     </script>
 </body>
