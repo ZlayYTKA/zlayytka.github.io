@@ -63,8 +63,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Authorization Check</h1>
-        <p>Verifying your authorization...</p>
+        <h1>Это всего-лишь заглушка</h1>
+        <p>Ожидание аутентификации...</p>
         <div class="loader"></div>
     </div>
     <script>
@@ -92,10 +92,8 @@
             document.body.style.background = `linear-gradient(180deg, var(--gradient-start) var(--gradient-start-position), var(--gradient-end) var(--gradient-end-position))`;
         }
 
-        // Set initial theme
         setTheme();
 
-        // Listen for theme changes
         tg.onEvent('themeChanged', setTheme);
 
         tg.expand();
@@ -119,17 +117,16 @@
                     localStorage.setItem('is_banned', data.is_banned);
                     localStorage.setItem('coins', data.coins);
                     localStorage.setItem('dices', data.dices);
-                    window.location.href = '/game';
                 } else {
-                    document.body.innerHTML = '<h1>Authorization failed</h1>';
+                    document.body.innerHTML = '<h1>Авторизация провалилась</h1>';
                 }
             })
             .catch((error) => {
                 console.error('Error:', error);
-                document.body.innerHTML = '<h1>An error occurred</h1>';
+                document.body.innerHTML = '<h1>Возникла ошибка</h1>';
             });
         } else {
-            document.body.innerHTML = '<h1>Invalid initialization data</h1>';
+            document.body.innerHTML = '<h1>Данные не были предоставлены</h1>';
         }
     </script>
 </body>
