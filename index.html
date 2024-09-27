@@ -3,55 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
+    <title>Nothing Cube</title>
     <style>
-        body {
-            background-color: #565560;
-            color: white;
-            text-align: center;
+        :root {
+            --bg-gradient-1: rgba(28, 32, 54, 0.5);
+            --bg-gradient-2: rgba(3, 156, 255, 0.5);
+            --container-bg: rgba(255, 255, 255, 0.8);
+            --container-shadow: rgba(0, 0, 0, 0.1);
+            --heading-color: #1c2036;
+            --text-color: #039cff;
+            --loader-border: #f3f3f3;
+            --loader-border-top: #039cff;
         }
-        h2 {
-            margin-top: 50px;
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-gradient-1: #000000;
+                --bg-gradient-2: #003D65;
+                --container-bg: rgba(24, 26, 27, 0.8);
+                --container-shadow: rgba(0, 0, 0, 0.1);
+                --heading-color: rgb(206, 202, 195);
+                --text-color: rgb(28, 166, 255);
+                --loader-border: rgb(51, 56, 58);
+                --loader-border-top: rgb(0, 108, 178);
+            }
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            color-scheme: var(--tg-color-scheme);
+        }
+        .container {
+            text-align: center;
+            background-color: var(--container-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px var(--container-shadow);
+        }
+        h1 {
+            color: var(--heading-color);
+            margin-bottom: 1rem;
+        }
+        p {
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+        .loader {
+            border: 5px solid var(--loader-border);
+            border-top: 5px solid var(--loader-border-top);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <h2>Это лишь заглушка</h2>
-    <p id="auth-status">Проверка авторизации...</p>
+    <div class="container">
+        <h1>Это лишь заглушка</h1>
+        <p>Проверка авторизации...</p>
+        <div class="loader"></div>
+    </div>
     <script>
-        Telegram.WebApp.ready();
-
-        const initData = Telegram.WebApp.initData || '';
-        const hashStr = Telegram.WebApp.initDataUnsafe.hash || '';
-
-        fetch('https://nothingcube-backend.onrender.com/auth', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ init_data: initData, hash: hashStr })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.authorized) {
-                document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
-                console.log("Аутентификация успешна!");
-                console.log("Данные пользователя:");
-                console.log("Nickname:", data.nickname);
-                console.log("Is Banned:", data.is_banned);
-                console.log("Coins:", data.coins);
-                console.log("Dices:", data.dices);
-                console.log("JWT:", data.token);
-            } else {
-                document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
-                console.log("Ошибка аутентификации");
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка при авторизации:', error);
-            document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
-        });
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.MainButton.hide();
+        if (tg.initDataUnsafe.query_id) {
+            fetch('https://cube-bot-server.ru/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    init_data: tg.initData,
+                    hash: tg.initDataUnsafe.hash
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.authorized) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('nickname', data.nickname);
+                    localStorage.setItem('is_banned', data.is_banned);
+                    localStorage.setItem('coins', data.coins);
+                    localStorage.setItem('dices', data.dices);
+                    window.location.href = '/game';
+                } else {
+                    document.body.innerHTML = '<h1>Authorization failed</h1>';
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.body.innerHTML = '<h1>An error occurred</h1>';
+            });
+        } else {
+            document.body.innerHTML = '<h1>Invalid initialization data</h1>';
+        }
     </script>
 </body>
 </html>
