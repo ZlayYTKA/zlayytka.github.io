@@ -98,36 +98,33 @@
 
         tg.expand();
         tg.MainButton.hide();
-        if (tg.initDataUnsafe.query_id) {
-            fetch('https://nothingcube-backend.onrender.com/auth', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    init_data: tg.initData,
-                    hash: tg.initDataUnsafe.hash
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.authorized) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('nickname', data.nickname);
-                    localStorage.setItem('is_banned', data.is_banned);
-                    localStorage.setItem('coins', data.coins);
-                    localStorage.setItem('dices', data.dices);
-                } else {
-                    document.body.innerHTML = '<h1>Авторизация провалилась</h1>';
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                document.body.innerHTML = '<h1>Возникла ошибка</h1>';
-            });
-        } else {
-            document.body.innerHTML = '<h1>Данные не были предоставлены</h1>';
-        }
+
+        const initData = tg.initData || '';
+        const hashStr = tg.initDataUnsafe.hash || '';
+
+        fetch('https://nothingcube-backend.onrender.com/auth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ init_data: initData, hash: hashStr })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.authorized) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('nickname', data.nickname);
+                localStorage.setItem('is_banned', data.is_banned);
+                localStorage.setItem('coins', data.coins);
+                localStorage.setItem('dices', data.dices);
+            } else {
+                document.body.innerHTML = '<h1>Авторизация провалилась</h1>';
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            document.body.innerHTML = '<h1>Возникла ошибка</h1>';
+        });
     </script>
 </body>
 </html>
