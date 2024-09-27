@@ -3,30 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nothing Cube</title>
+    <title>Authorization Check</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-gradient-1: rgba(28, 32, 54, 0.5);
-            --bg-gradient-2: rgba(3, 156, 255, 0.5);
-            --container-bg: rgba(255, 255, 255, 0.8);
-            --container-shadow: rgba(0, 0, 0, 0.1);
-            --heading-color: #1c2036;
-            --text-color: #039cff;
-            --loader-border: #f3f3f3;
-            --loader-border-top: #039cff;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-gradient-1: #000000;
-                --bg-gradient-2: #003D65;
-                --container-bg: rgba(24, 26, 27, 0.8);
-                --container-shadow: rgba(0, 0, 0, 0.1);
-                --heading-color: rgb(206, 202, 195);
-                --text-color: rgb(28, 166, 255);
-                --loader-border: rgb(51, 56, 58);
-                --loader-border-top: rgb(0, 108, 178);
-            }
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-link-color: #2481cc;
+            --tg-theme-button-color: #5288c1;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f0f0f0;
+            --tg-color-scheme: light;
+            --gradient-start: rgba(28, 32, 54, 0.5);
+            --gradient-end: rgba(3, 156, 255, 0.5);
         }
 
         body, html {
@@ -37,27 +27,28 @@
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 64%);
+            color: var(--tg-theme-text-color);
             color-scheme: var(--tg-color-scheme);
         }
         .container {
             text-align: center;
-            background-color: var(--container-bg);
+            background-color: var(--tg-theme-bg-color);
             padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 6px var(--container-shadow);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            color: var(--heading-color);
+            color: var(--tg-theme-text-color);
             margin-bottom: 1rem;
         }
         p {
-            color: var(--text-color);
+            color: var(--tg-theme-hint-color);
             font-size: 1.2rem;
         }
         .loader {
-            border: 5px solid var(--loader-border);
-            border-top: 5px solid var(--loader-border-top);
+            border: 5px solid var(--tg-theme-secondary-bg-color);
+            border-top: 5px solid var(--tg-theme-button-color);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -69,20 +60,48 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Это лишь заглушка</h1>
-        <p>Проверка авторизации...</p>
+        <h1>Authorization Check</h1>
+        <p>Verifying your authorization...</p>
         <div class="loader"></div>
     </div>
     <script>
         let tg = window.Telegram.WebApp;
+
+        function setTheme() {
+            document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
+
+            for (let [key, value] of Object.entries(tg.themeParams)) {
+                document.documentElement.style.setProperty(`--tg-theme-${key.replace(/_/g, '-')}`, value);
+            }
+
+            if (tg.colorScheme === 'dark') {
+                document.documentElement.style.setProperty('--gradient-start', '#000000');
+                document.documentElement.style.setProperty('--gradient-end', '#003D65');
+                document.documentElement.style.setProperty('--gradient-start-position', '22.92%');
+                document.documentElement.style.setProperty('--gradient-end-position', '100%');
+            } else {
+                document.documentElement.style.setProperty('--gradient-start', 'rgba(28, 32, 54, 0.5)');
+                document.documentElement.style.setProperty('--gradient-end', 'rgba(3, 156, 255, 0.5)');
+                document.documentElement.style.setProperty('--gradient-start-position', '0%');
+                document.documentElement.style.setProperty('--gradient-end-position', '64%');
+            }
+
+            document.body.style.background = `linear-gradient(180deg, var(--gradient-start) var(--gradient-start-position), var(--gradient-end) var(--gradient-end-position))`;
+        }
+
+        // Set initial theme
+        setTheme();
+
+        // Listen for theme changes
+        tg.onEvent('themeChanged', setTheme);
+
         tg.expand();
         tg.MainButton.hide();
         if (tg.initDataUnsafe.query_id) {
-            fetch('https://cube-bot-server.ru/auth', {
+            fetch('https://nothingcube-backend.onrender.com/auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
