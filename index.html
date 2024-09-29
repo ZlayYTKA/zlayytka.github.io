@@ -23,6 +23,7 @@
             padding: 0;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
@@ -35,6 +36,7 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease-in-out;
         }
         h1 {
             color: var(--tg-theme-text-color);
@@ -57,16 +59,60 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .user-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button {
+            width: 171px;
+            height: 61px;
+            padding: 10px 0px 0px 0px;
+            border-radius: 15px 0px 0px 0px;
+            background: linear-gradient(90deg, #43E1FF 0%, #F1FAEE 100%);
+            border: none;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 30px;
+            text-align: center;
+            color: rgba(64, 81, 115, 1);
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="auth-container">
         <h1>Это всего-лишь заглушка</h1>
         <p id="auth-status">Ожидание аутентификации...</p>
         <div class="loader"></div>
     </div>
+    <div class="container" id="main-container" style="display: none;">
+        <div class="user-info">
+            <p>Монеты: <span id="coins">0</span> Броски: <span id="dices">0</span></p>
+            <p>Ваш уровень: <span id="level">1</span></p>
+        </div>
+        <div class="result" id="result"></div>
+        <div class="button-grid">
+            <button class="button" id="rollDice">Бросить кубик</button>
+            <button class="button">Пока ничего</button>
+            <button class="button">Пока ничего</button>
+            <button class="button">Пока ничего</button>
+        </div>
+    </div>
     <script>
         let tg = window.Telegram.WebApp;
+        let userToken = '';
 
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
@@ -107,6 +153,12 @@
                 document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
                 console.log("Аутентификация успешна!");
                 console.log("Данные пользователя:", data);
+                userToken = data.token;
+                document.getElementById('coins').textContent = data.coins;
+                document.getElementById('dices').textContent = data.dices;
+                document.getElementById('level').textContent = data.level;
+                document.getElementById('auth-container').style.transform = 'translateY(-100%)';
+                document.getElementById('main-container').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
@@ -117,6 +169,29 @@
             console.error('Ошибка при авторизации:', error);
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
             document.querySelector('.loader').style.display = 'none';
+        });
+
+        document.getElementById('rollDice').addEventListener('click', () => {
+            fetch('https://nothingcube-dice.onrender.com/roll', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('result').textContent = data.message;
+                } else {
+                    document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
+                    document.getElementById('coins').textContent = data.coins;
+                    document.getElementById('dices').textContent = data.dices;
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
+            });
         });
     </script>
 </body>
