@@ -140,7 +140,7 @@
         const initData = tg.initData || '';
         const hashStr = tg.initDataUnsafe.hash || '';
 
-        fetch('https://nothingcube-startup.onrender.com/auth', {
+        fetch('https://zlayytka-nothingcube-backend-ca06.twc1.net/auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -172,7 +172,7 @@
         });
 
         document.getElementById('rollDice').addEventListener('click', () => {
-            fetch('https://nothingcube-dice.onrender.com/roll', {
+            fetch('https://zlayytka-nothingcube-backend-005a.twc1.net/roll', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${userToken}`,
