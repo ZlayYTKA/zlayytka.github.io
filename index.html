@@ -140,7 +140,7 @@
         }
 
         function startTimer(nextReplenishment) {
-            console.log(`Next replenishment from server: ${nextReplenishment}`);
+            console.log(`Next replenishment from server (UTC): ${nextReplenishment}`);
 
             if (!nextReplenishment) {
                 console.log('Next replenishment is null or undefined');
@@ -148,20 +148,42 @@
             }
 
             const now = new Date();
-            const replenishmentTime = new Date(nextReplenishment);
+            const replenishmentTime = new Date(nextReplenishment + 'Z');
 
-            console.log(`Updating next replenishment with time: ${nextReplenishment}`);
-            console.log(`Время сейчас: ${now}`);
-            console.log(`Replenishment time: ${replenishmentTime}`);
+            console.log(`Current time (Local): ${now}`);
+            console.log(`Replenishment time (Local): ${replenishmentTime}`);
 
             const diff = replenishmentTime - now;
-            console.log(`Time difference: ${diff}`);
+            console.log(`Time difference (ms): ${diff}`);
 
-            // Дополнительная информация для отладки
-            console.log(`Now timestamp: ${now.getTime()}`);
-            console.log(`Replenishment timestamp: ${replenishmentTime.getTime()}`);
-            console.log(`Now UTC: ${now.toUTCString()}`);
-            console.log(`Replenishment UTC: ${replenishmentTime.toUTCString()}`);
+            const timerElement = document.getElementById('timer');
+
+            if (diff <= 0) {
+                console.log('Replenishment time has already passed');
+                timerElement.style.display = 'none';
+                return;
+            }
+
+            function updateTimer() {
+                const currentTime = new Date();
+                const timeLeft = replenishmentTime - currentTime;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.style.display = 'none';
+                    return;
+                }
+
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+            console.log(`User's timezone offset: ${now.getTimezoneOffset()} minutes`);
+            console.log(`Server time (UTC): ${new Date(nextReplenishment).toUTCString()}`);
+            console.log(`Local time (User's timezone): ${replenishmentTime.toString()}`);
         }
 
         setTheme();
