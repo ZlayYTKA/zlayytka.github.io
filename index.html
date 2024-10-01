@@ -161,37 +161,30 @@
         .then(data => {
             if (data.authorized) {
                 document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
-                console.log("Аутентификация успешна!");
-                console.log("Данные пользователя:", data);
                 userToken = data.token;
                 document.getElementById('coins').textContent = data.coins;
                 document.getElementById('dices').textContent = data.dices;
                 document.getElementById('level').textContent = data.level;
-        
-                console.log("Next replenishment from server:", data.next_replenishment);
+
                 if (data.next_replenishment) {
                     updateNextReplenishment(data.next_replenishment);
                 } else {
-                    console.log("No next replenishment data received");
                     document.getElementById('next_replenishment_container').style.display = 'none';
                 }
-        
+
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
-                console.log("Ошибка аутентификации");
             }
             document.querySelector('.loader').style.display = 'none';
         })
         .catch(error => {
-            console.error('Ошибка при авторизации:', error);
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
             document.querySelector('.loader').style.display = 'none';
         });
 
         function updateNextReplenishment(nextReplenishmentTime) {
-            console.log("Updating next replenishment with time:", nextReplenishmentTime);
             const container = document.getElementById('next_replenishment_container');
             const display = document.getElementById('next_replenishment');
 
@@ -200,10 +193,6 @@
                     const now = new Date();
                     const replenishmentDate = new Date(nextReplenishmentTime + 'Z');
                     const diff = replenishmentDate.getTime() - now.getTime();
-
-                    console.log("Время сейчас (локальное):", now);
-                    console.log("Время пополнения (UTC):", replenishmentDate);
-                    console.log("Разница во времени (мс):", diff);
 
                     if (diff > 0) {
                         const minutes = Math.floor(diff / 60000);
@@ -218,7 +207,6 @@
 
                 updateTimer();
             } else {
-                console.log("Время не было предоставлено");
                 container.style.display = 'none';
             }
         }
@@ -238,10 +226,12 @@
                     document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
                     document.getElementById('coins').textContent = data.coins;
                     document.getElementById('dices').textContent = data.dices;
+                    if (data.next_replenishment) {
+                        updateNextReplenishment(data.next_replenishment);
+                    }
                 }
             })
             .catch(error => {
-                console.error('Ошибка:', error);
                 document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
             });
         });
