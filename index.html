@@ -157,6 +157,7 @@
             },
             body: JSON.stringify({ init_data: initData, hash: hashStr })
         })
+        .then(response => response.json())
         .then(data => {
             if (data.authorized) {
                 document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
