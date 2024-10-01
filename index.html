@@ -122,14 +122,14 @@
         let userLevel, userDices, maxDices;
         let timerInterval;
         let replenishmentTime;
-    
+
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
-    
+
             for (let [key, value] of Object.entries(tg.themeParams)) {
                 document.documentElement.style.setProperty(`--tg-theme-${key.replace(/_/g, '-')}`, value);
             }
-    
+
             if (tg.colorScheme === 'dark') {
                 document.documentElement.style.setProperty('--gradient-start', '#000000');
                 document.documentElement.style.setProperty('--gradient-end', '#003D65');
@@ -137,72 +137,80 @@
                 document.documentElement.style.setProperty('--gradient-start', 'rgba(28, 32, 54, 0.5)');
                 document.documentElement.style.setProperty('--gradient-end', 'rgba(3, 156, 255, 0.5)');
             }
-    
+
             document.body.style.background = `linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 64%)`;
         }
-    
+
         function updateDicesDisplay() {
             document.getElementById('dices').textContent = userDices;
         }
-    
+
         function calculateMaxDices(level) {
             return Math.min(level * 6, 60);
         }
-    
+
         function addDices() {
             const dicesToAdd = Math.min(userLevel, maxDices - userDices);
             userDices = Math.min(userDices + dicesToAdd, maxDices);
             updateDicesDisplay();
-    
+
+            console.log(`Добавлено бросков: ${dicesToAdd}. Текущее количество: ${userDices}`);
+
             if (userDices < maxDices) {
                 replenishmentTime = new Date(Date.now() + 3 * 60000);
-                startTimer(replenishmentTime.toISOString());
+                const nextReplenishment = replenishmentTime.toISOString().split('.')[0] + "Z";
+                console.log(`Новое время пополнения: ${nextReplenishment}`);
+                startTimer(nextReplenishment);
             } else {
+                console.log('Достигнут максимум бросков. Таймер остановлен.');
                 clearInterval(timerInterval);
                 document.getElementById('timer').style.display = 'none';
             }
         }
-    
+
         function startTimer(nextReplenishment) {
             console.log(`Next replenishment (UTC): ${nextReplenishment}`);
-    
+
             if (!nextReplenishment) {
                 console.log('Next replenishment is null or undefined');
                 return;
             }
-    
-            replenishmentTime = new Date(nextReplenishment + 'Z');
+
+            replenishmentTime = new Date(nextReplenishment);
             const timerElement = document.getElementById('timer');
-    
+
             clearInterval(timerInterval);
-    
+
             function updateTimer() {
                 const now = new Date();
                 const timeLeft = replenishmentTime - now;
-    
+
+                console.log(`Текущее время: ${now.toISOString()}, Время пополнения: ${replenishmentTime.toISOString()}, Осталось: ${timeLeft}ms`);
+
                 if (timeLeft <= 0) {
+                    console.log('Таймер истек. Добавление бросков.');
                     addDices();
                     return;
                 }
-    
+
                 const minutes = Math.floor(timeLeft / 60000);
                 const seconds = Math.floor((timeLeft % 60000) / 1000);
                 timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 timerElement.style.display = 'block';
             }
-    
+
             updateTimer();
             timerInterval = setInterval(updateTimer, 1000);
         }
-    
+
         setTheme();
         tg.onEvent('themeChanged', setTheme);
-    
+
         tg.expand();
-    
+
         const initData = tg.initData || '';
         const hashStr = tg.initDataUnsafe.hash || '';
-    
+
         fetch('https://zlayytka-nothingcube-backend-41c4.twc1.net/auth', {
             method: 'POST',
             headers: {
@@ -217,13 +225,13 @@
                 userLevel = data.level;
                 userDices = data.dices;
                 maxDices = calculateMaxDices(userLevel);
-    
+
                 document.getElementById('coins').textContent = data.coins;
                 updateDicesDisplay();
                 document.getElementById('level').textContent = userLevel;
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('main-container').style.display = 'block';
-    
+
                 if (userDices < maxDices && data.next_replenishment) {
                     startTimer(data.next_replenishment);
                 }
@@ -234,7 +242,7 @@
         .catch(error => {
             console.error('Ошибка при авторизации:', error);
         });
-    
+
         document.getElementById('rollDice').addEventListener('click', () => {
             fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
                 method: 'POST',
@@ -251,9 +259,13 @@
                     document.getElementById('coins').textContent = data.coins;
                     userDices = data.dices;
                     updateDicesDisplay();
-    
+        
+                    console.log('Ответ сервера:', data);
+        
                     if (data.next_replenishment) {
-                        startTimer(data.next_replenishment);
+                        const nextReplenishment = new Date(data.next_replenishment).toISOString().split('.')[0] + "Z";
+                        console.log(`Обработанное время следующего пополнения: ${nextReplenishment}`);
+                        startTimer(nextReplenishment);
                     } else if (userDices === maxDices) {
                         clearInterval(timerInterval);
                         document.getElementById('timer').style.display = 'none';
