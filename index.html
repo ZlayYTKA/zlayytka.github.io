@@ -92,6 +92,11 @@
         .timer {
             font-size: 0.8em;
             color: var(--tg-theme-hint-color);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .timer.visible {
+            opacity: 1;
         }
     </style>
 </head>
@@ -142,36 +147,45 @@
 
         tg.expand();
 
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            if (replenishmentDate) {
+                const now = new Date();
+                const difference = replenishmentDate.getTime() - now.getTime();
+
+                if (difference > 0) {
+                    const minutes = Math.floor(difference / 60000);
+                    const seconds = Math.floor((difference % 60000) / 1000);
+                    timerElement.textContent = ` (${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
+                    timerElement.classList.add('visible');
+                    requestAnimationFrame(updateTimerDisplay);
+                } else {
+                    timerElement.textContent = '';
+                    timerElement.classList.remove('visible');
+                }
+            } else {
+                timerElement.textContent = '';
+                timerElement.classList.remove('visible');
+            }
+        }
+
         function updateTimer(nextReplenishment) {
-            console.log("Next replenishment from server:", nextReplenishment);
             clearInterval(timerInterval);
             if (nextReplenishment) {
-                console.log("Updating next replenishment with time:", nextReplenishment);
-                const timerElement = document.getElementById('timer');
-                const replenishmentDate = new Date(nextReplenishment + 'Z');  // Добавляем 'Z' для явного указания UTC
-                console.log("Parsed replenishment date:", replenishmentDate.toISOString());
-
-                timerInterval = setInterval(() => {
-                    const now = new Date();
-                    const difference = replenishmentDate.getTime() - now.getTime();
-
-                    console.log("Время сейчас (local):", now.toLocaleString());
-                    console.log("Replenishment time (UTC):", replenishmentDate.toUTCString());
-                    console.log("Time difference (ms):", difference);
-
-                    if (difference > 0) {
-                        const minutes = Math.floor(difference / 60000);
-                        const seconds = Math.floor((difference % 60000) / 1000);
-                        timerElement.textContent = ` (${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
-                    } else {
-                        clearInterval(timerInterval);
-                        timerElement.textContent = '';
-                    }
-                }, 1000);
+                replenishmentDate = new Date(nextReplenishment + 'Z');
+                requestAnimationFrame(updateTimerDisplay);
             } else {
-                console.log("Next replenishment is null or undefined");
-                document.getElementById('timer').textContent = '';
+                replenishmentDate = null;
+                updateTimerDisplay();
             }
+        }
+
+        function updateUserInfo(data) {
+            document.getElementById('coins').textContent = data.coins;
+            document.getElementById('dices').textContent = data.dices;
+            document.getElementById('level').textContent = data.level;
+            updateTimer(data.next_replenishment);
         }
 
         const initData = tg.initData || '';
@@ -191,12 +205,11 @@
                 console.log("Аутентификация успешна!");
                 console.log("Данные пользователя:", data);
                 userToken = data.token;
-                document.getElementById('coins').textContent = data.coins;
-                document.getElementById('dices').textContent = data.dices;
-                document.getElementById('level').textContent = data.level;
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
-                updateTimer(data.next_replenishment);
+                setTimeout(() => {
+                    updateUserInfo(data);
+                }, 50);
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
