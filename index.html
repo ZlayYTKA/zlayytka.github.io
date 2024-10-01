@@ -89,6 +89,10 @@
             font-size: 24px;
             font-weight: bold;
         }
+        .timer {
+            font-size: 0.8em;
+            color: var(--tg-theme-hint-color);
+        }
     </style>
 </head>
 <body>
@@ -99,7 +103,7 @@
     </div>
     <div class="container" id="main-container" style="display: none;">
         <div class="user-info">
-            <p>Монеты: <span id="coins">0</span> Броски: <span id="dices">0</span></p>
+            <p>Монеты: <span id="coins">0</span> Броски: <span id="dices">0</span> <span id="timer" class="timer"></span></p>
             <p>Ваш уровень: <span id="level">1</span></p>
         </div>
         <div class="result" id="result"></div>
@@ -111,118 +115,9 @@
         </div>
     </div>
     <script>
-        // Константы
-        const REPLENISHMENT_INTERVAL = 3 * 60 * 1000; // 3 минуты в миллисекундах
-
-        // Функция для форматирования времени в формат ММ:СС
-        function formatTime(milliseconds) {
-            const totalSeconds = Math.floor(milliseconds / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Функция для вычисления максимального количества бросков для данного уровня
-        function getMaxDices(level) {
-            return Math.min(level * 6, 60);
-        }
-
-        // Функция для вычисления количества бросков, добавляемых за одно пополнение
-        function getDicesPerReplenishment(level) {
-            return Math.min(level, 10);
-        }
-
-        class DiceManager {
-            constructor(initialDices, initialLevel) {
-                this.dices = initialDices;
-                this.level = initialLevel;
-                this.maxDices = getMaxDices(this.level);
-                this.replenishmentTimer = null;
-                this.nextReplenishment = null;
-                this.onUpdate = null;
-            }
-
-            setUpdateCallback(callback) {
-                this.onUpdate = callback;
-            }
-
-            updateUI() {
-                if (this.onUpdate) {
-                    this.onUpdate(this.dices, this.nextReplenishment);
-                }
-            }
-
-            setNextReplenishment(timestamp) {
-                if (timestamp === null) {
-                    this.nextReplenishment = null;
-                    this.updateUI();
-                    return;
-                }
-
-                this.nextReplenishment = new Date(timestamp);
-                this.startReplenishmentTimer();
-            }
-
-            startReplenishmentTimer() {
-                if (this.replenishmentTimer) {
-                    clearTimeout(this.replenishmentTimer);
-                }
-
-                const now = new Date();
-                let timeUntilReplenishment = this.nextReplenishment - now;
-
-                if (timeUntilReplenishment <= 0) {
-                    this.replenishDices();
-                    return;
-                }
-
-                this.replenishmentTimer = setInterval(() => {
-                    timeUntilReplenishment -= 1000;
-                    if (timeUntilReplenishment <= 0) {
-                        clearInterval(this.replenishmentTimer);
-                        this.replenishDices();
-                    } else {
-                        this.updateUI();
-                    }
-                }, 1000);
-
-                this.updateUI();
-            }
-
-            replenishDices() {
-                const dicesToAdd = Math.min(
-                    getDicesPerReplenishment(this.level),
-                    this.maxDices - this.dices
-                );
-                this.dices = Math.min(this.dices + dicesToAdd, this.maxDices);
-
-                if (this.dices < this.maxDices) {
-                    this.nextReplenishment = new Date(Date.now() + REPLENISHMENT_INTERVAL);
-                    this.startReplenishmentTimer();
-                } else {
-                    this.nextReplenishment = null;
-                }
-
-                this.updateUI();
-            }
-
-            useDice() {
-                if (this.dices > 0) {
-                    this.dices--;
-                    if (this.dices === this.maxDices - 1 && this.nextReplenishment === null) {
-                        this.nextReplenishment = new Date(Date.now() + REPLENISHMENT_INTERVAL);
-                        this.startReplenishmentTimer();
-                    }
-                    this.updateUI();
-                    return true;
-                }
-                return false;
-            }
-        }
-
         let tg = window.Telegram.WebApp;
         let userToken = '';
-        let diceManager;
+        let timerInterval;
 
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
@@ -247,24 +142,31 @@
 
         tg.expand();
 
-        const initData = tg.initData || '';
-        const hashStr = tg.initDataUnsafe.hash || '';
-
-        function updateDiceUI(dices, nextReplenishment) {
-            const dicesElement = document.getElementById('dices');
-            const maxDices = getMaxDices(diceManager.level);
+        function updateTimer(nextReplenishment) {
+            clearInterval(timerInterval);
             if (nextReplenishment) {
-                const now = new Date();
-                const timeLeft = nextReplenishment - now;
-                if (timeLeft > 0) {
-                    dicesElement.textContent = `${dices} из ${maxDices} (${formatTime(timeLeft)})`;
-                } else {
-                    dicesElement.textContent = `${dices} из ${maxDices}`;
-                }
+                const timerElement = document.getElementById('timer');
+                timerInterval = setInterval(() => {
+                    const now = new Date().getTime();
+                    const replenishmentTime = new Date(nextReplenishment).getTime();
+                    const difference = replenishmentTime - now;
+
+                    if (difference > 0) {
+                        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                        timerElement.textContent = ` (${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
+                    } else {
+                        clearInterval(timerInterval);
+                        timerElement.textContent = '';
+                    }
+                }, 1000);
             } else {
-                dicesElement.textContent = `${dices} из ${maxDices}`;
+                document.getElementById('timer').textContent = '';
             }
         }
+
+        const initData = tg.initData || '';
+        const hashStr = tg.initDataUnsafe.hash || '';
 
         fetch('https://zlayytka-nothingcube-backend-41c4.twc1.net/auth', {
             method: 'POST',
@@ -281,14 +183,11 @@
                 console.log("Данные пользователя:", data);
                 userToken = data.token;
                 document.getElementById('coins').textContent = data.coins;
+                document.getElementById('dices').textContent = data.dices;
                 document.getElementById('level').textContent = data.level;
-
-                diceManager = new DiceManager(data.dices, data.level);
-                diceManager.setUpdateCallback(updateDiceUI);
-                diceManager.setNextReplenishment(data.next_replenishment);
-
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
+                updateTimer(data.next_replenishment);
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
@@ -302,31 +201,27 @@
         });
 
         document.getElementById('rollDice').addEventListener('click', () => {
-            if (diceManager.useDice()) {
-                fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${userToken}`,
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        document.getElementById('result').textContent = data.message;
-                    } else {
-                        document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
-                        document.getElementById('coins').textContent = data.coins;
-                        diceManager.dices = data.dices;
-                        diceManager.setNextReplenishment(data.next_replenishment);
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
-                });
-            } else {
-                document.getElementById('result').textContent = 'Недостаточно бросков';
-            }
+            fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById('result').textContent = data.message;
+                } else {
+                    document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
+                    document.getElementById('coins').textContent = data.coins;
+                    document.getElementById('dices').textContent = data.dices;
+                    updateTimer(data.next_replenishment);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
+            });
         });
     </script>
 </body>
