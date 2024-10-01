@@ -29,7 +29,6 @@
             font-family: Arial, sans-serif;
             background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 64%);
             color: var(--tg-theme-text-color);
-            box-sizing: border-box;
         }
         .container {
             text-align: center;
@@ -38,9 +37,6 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.5s ease-in-out;
-            width: 100%;
-            max-width: 600px;
-            box-sizing: border-box;
         }
         h1 {
             color: var(--tg-theme-text-color);
@@ -74,10 +70,9 @@
             margin-top: 20px;
         }
         .button {
-            width: 100%;
-            max-width: 171px;
+            width: 171px;
             height: 61px;
-            padding: 5px;
+            padding: 10px 0px 0px 0px;
             border-radius: 15px 0px 0px 0px;
             background: linear-gradient(90deg, #43E1FF 0%, #F1FAEE 100%);
             border: none;
@@ -85,13 +80,9 @@
             font-family: 'Montserrat', sans-serif;
             font-size: 20px;
             font-weight: 800;
-            color: rgba(64, 81, 115, 1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            line-height: 30px;
             text-align: center;
-            line-height: 1.2;
-            word-wrap: break-word;
+            color: rgba(64, 81, 115, 1);
         }
         .result {
             margin-top: 20px;
@@ -109,7 +100,6 @@
     <div class="container" id="main-container" style="display: none;">
         <div class="user-info">
             <p>Монеты: <span id="coins">0</span> Броски: <span id="dices">0</span></p>
-            <p id="next_replenishment_container" style="display: none;"><span id="next_replenishment"></span></p>
             <p>Ваш уровень: <span id="level">1</span></p>
         </div>
         <div class="result" id="result"></div>
@@ -161,53 +151,25 @@
         .then(data => {
             if (data.authorized) {
                 document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
+                console.log("Аутентификация успешна!");
+                console.log("Данные пользователя:", data);
                 userToken = data.token;
                 document.getElementById('coins').textContent = data.coins;
                 document.getElementById('dices').textContent = data.dices;
                 document.getElementById('level').textContent = data.level;
-                if (data.next_replenishment) {
-                    updateNextReplenishment(data.next_replenishment);
-                } else {
-                    document.getElementById('next_replenishment_container').style.display = 'none';
-                }
-
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
+                console.log("Ошибка аутентификации");
             }
             document.querySelector('.loader').style.display = 'none';
         })
         .catch(error => {
+            console.error('Ошибка при авторизации:', error);
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
             document.querySelector('.loader').style.display = 'none';
         });
-
-        function updateNextReplenishment(nextReplenishmentTime) {
-            const container = document.getElementById('next_replenishment_container');
-            const display = document.getElementById('next_replenishment');
-
-            if (nextReplenishmentTime) {
-                const updateTimer = () => {
-                    const now = new Date();
-                    const replenishmentDate = new Date(nextReplenishmentTime + 'Z');
-                    const diff = replenishmentDate.getTime() - now.getTime();
-                    if (diff > 0) {
-                        const minutes = Math.floor(diff / 60000);
-                        const seconds = Math.floor((diff % 60000) / 1000);
-                        display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                        container.style.display = 'block';
-                        setTimeout(updateTimer, 1000);
-                    } else {
-                        container.style.display = 'none';
-                    }
-                };
-
-                updateTimer();
-            } else {
-                container.style.display = 'none';
-            }
-        }
 
         document.getElementById('rollDice').addEventListener('click', () => {
             fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
@@ -227,6 +189,7 @@
                 }
             })
             .catch(error => {
+                console.error('Ошибка:', error);
                 document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
             });
         });
