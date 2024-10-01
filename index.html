@@ -148,18 +148,20 @@
             if (nextReplenishment) {
                 console.log("Updating next replenishment with time:", nextReplenishment);
                 const timerElement = document.getElementById('timer');
-                timerInterval = setInterval(() => {
-                    const now = new Date().getTime();
-                    const replenishmentTime = new Date(nextReplenishment).getTime();
-                    const difference = replenishmentTime - now;
+                const replenishmentDate = new Date(nextReplenishment + 'Z');  // Добавляем 'Z' для явного указания UTC
+                console.log("Parsed replenishment date:", replenishmentDate.toISOString());
 
-                    console.log("Время сейчас (local):", new Date().toLocaleString());
-                    console.log("Replenishment time (UTC):", new Date(replenishmentTime).toUTCString());
+                timerInterval = setInterval(() => {
+                    const now = new Date();
+                    const difference = replenishmentDate.getTime() - now.getTime();
+
+                    console.log("Время сейчас (local):", now.toLocaleString());
+                    console.log("Replenishment time (UTC):", replenishmentDate.toUTCString());
                     console.log("Time difference (ms):", difference);
 
                     if (difference > 0) {
-                        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                        const minutes = Math.floor(difference / 60000);
+                        const seconds = Math.floor((difference % 60000) / 1000);
                         timerElement.textContent = ` (${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')})`;
                     } else {
                         clearInterval(timerInterval);
