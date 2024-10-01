@@ -234,6 +234,9 @@
                     document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
                     document.getElementById('coins').textContent = data.coins;
                     document.getElementById('dices').textContent = data.dices;
+                    if (data.next_replenishment) {
+                        updateNextReplenishment(data.next_replenishment);
+                    }
                 }
             })
             .catch(error => {
