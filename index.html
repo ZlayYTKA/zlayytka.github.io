@@ -119,7 +119,6 @@
     <script>
         let tg = window.Telegram.WebApp;
         let userToken = '';
-        let timerInterval;
 
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
@@ -139,37 +138,44 @@
             document.body.style.background = `linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 64%)`;
         }
 
-        function startTimer(nextReplenishment) {
-            console.log(`Next replenishment from server (UTC): ${nextReplenishment}`);
+        let userLevel, userDices, maxDices;
+        let timerInterval;
 
+        function updateDicesDisplay() {
+            document.getElementById('dices').textContent = userDices;
+        }
+
+        function calculateMaxDices(level) {
+            return Math.min(level * 6, 60);
+        }
+
+        function addDices() {
+            const dicesToAdd = Math.min(userLevel, maxDices - userDices);
+            userDices = Math.min(userDices + dicesToAdd, maxDices);
+            updateDicesDisplay();
+
+            if (userDices === maxDices) {
+                clearInterval(timerInterval);
+                document.getElementById('timer').style.display = 'none';
+            }
+        }
+
+        function startTimer(nextReplenishment) {
             if (!nextReplenishment) {
-                console.log('Next replenishment is null or undefined');
                 return;
             }
 
-            const now = new Date();
             const replenishmentTime = new Date(nextReplenishment + 'Z');
-
-            console.log(`Current time (Local): ${now}`);
-            console.log(`Replenishment time (Local): ${replenishmentTime}`);
-
-            const diff = replenishmentTime - now;
-            console.log(`Time difference (ms): ${diff}`);
-
             const timerElement = document.getElementById('timer');
 
-            if (diff <= 0) {
-                console.log('Replenishment time has already passed');
-                timerElement.style.display = 'none';
-                return;
-            }
+            clearInterval(timerInterval);
 
             function updateTimer() {
-                const currentTime = new Date();
-                const timeLeft = replenishmentTime - currentTime;
+                const now = new Date();
+                const timeLeft = replenishmentTime - now;
 
                 if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
+                    addDices();
                     timerElement.style.display = 'none';
                     return;
                 }
@@ -177,13 +183,11 @@
                 const minutes = Math.floor(timeLeft / 60000);
                 const seconds = Math.floor((timeLeft % 60000) / 1000);
                 timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerElement.style.display = 'block';
             }
 
             updateTimer();
-            const timerInterval = setInterval(updateTimer, 1000);
-            console.log(`User's timezone offset: ${now.getTimezoneOffset()} minutes`);
-            console.log(`Server time (UTC): ${new Date(nextReplenishment).toUTCString()}`);
-            console.log(`Local time (User's timezone): ${replenishmentTime.toString()}`);
+            timerInterval = setInterval(updateTimer, 1000);
         }
 
         setTheme();
@@ -204,16 +208,20 @@
         .then(response => response.json())
         .then(data => {
             if (data.authorized) {
-                console.log("Аутентификация успешна!");
-                console.log("Данные пользователя:", data);
                 userToken = data.token;
+                userLevel = data.level;
+                userDices = data.dices;
+                maxDices = calculateMaxDices(userLevel);
+
                 document.getElementById('coins').textContent = data.coins;
-                document.getElementById('dices').textContent = data.dices;
-                document.getElementById('level').textContent = data.level;
+                updateDicesDisplay();
+                document.getElementById('level').textContent = userLevel;
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('main-container').style.display = 'block';
 
-                startTimer(data.next_replenishment);
+                if (userDices < maxDices && data.next_replenishment) {
+                    startTimer(data.next_replenishment);
+                }
             } else {
                 console.log("Ошибка аутентификации");
             }
@@ -236,11 +244,18 @@
                 } else {
                     document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
                     document.getElementById('coins').textContent = data.coins;
-                    document.getElementById('dices').textContent = data.dices;
+                    userDices = data.dices;
+                    updateDicesDisplay();
+
+                    if (data.next_replenishment) {
+                        startTimer(data.next_replenishment);
+                    } else if (userDices === maxDices) {
+                        clearInterval(timerInterval);
+                        document.getElementById('timer').style.display = 'none';
+                    }
                 }
             })
             .catch(error => {
-                console.error('Ошибка:', error);
                 document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
             });
         });
