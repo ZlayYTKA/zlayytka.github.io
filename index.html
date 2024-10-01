@@ -30,7 +30,6 @@
             background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 64%);
             color: var(--tg-theme-text-color);
             box-sizing: border-box;
-            overflow: hidden;
         }
         .container {
             text-align: center;
@@ -40,8 +39,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
             box-sizing: border-box;
             position: absolute;
             top: 50%;
@@ -104,14 +101,6 @@
             font-size: 24px;
             font-weight: bold;
         }
-        #auth-container {
-            transition: transform 0.5s ease-in-out;
-        }
-        #main-container {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
     </style>
 </head>
 <body>
@@ -137,9 +126,6 @@
     <script>
         let tg = window.Telegram.WebApp;
         let userToken = '';
-        let userLevel = 1;
-        let userDices = 0;
-        let timerInterval;
 
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
@@ -180,10 +166,8 @@
                 document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
                 userToken = data.token;
                 document.getElementById('coins').textContent = data.coins;
-                userDices = data.dices;
-                document.getElementById('dices').textContent = userDices;
-                userLevel = data.level;
-                document.getElementById('level').textContent = userLevel;
+                document.getElementById('dices').textContent = data.dices;
+                document.getElementById('level').textContent = data.level;
 
                 if (data.next_replenishment) {
                     updateNextReplenishment(data.next_replenishment);
@@ -191,14 +175,8 @@
                     document.getElementById('next_replenishment_container').style.display = 'none';
                 }
 
-                document.getElementById('auth-container').style.transform = 'translateY(-100%)';
-                setTimeout(() => {
-                    document.getElementById('auth-container').style.display = 'none';
-                    document.getElementById('main-container').style.display = 'block';
-                    setTimeout(() => {
-                        document.getElementById('main-container').style.opacity = '1';
-                    }, 50);
-                }, 500);
+                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('main-container').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
             }
@@ -210,7 +188,6 @@
         });
 
         function updateNextReplenishment(nextReplenishmentTime) {
-            clearInterval(timerInterval);
             const container = document.getElementById('next_replenishment_container');
             const display = document.getElementById('next_replenishment');
 
@@ -225,47 +202,40 @@
                         const seconds = Math.floor((diff % 60000) / 1000);
                         display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                         container.style.display = 'block';
+                        setTimeout(updateTimer, 1000);
                     } else {
                         container.style.display = 'none';
-                        clearInterval(timerInterval);
                     }
                 };
 
                 updateTimer();
-                timerInterval = setInterval(updateTimer, 1000);
             } else {
                 container.style.display = 'none';
             }
         }
 
         document.getElementById('rollDice').addEventListener('click', () => {
-            if (userDices > 0) {
-                fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${userToken}`,
-                    },
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        document.getElementById('result').textContent = data.message;
-                    } else {
-                        document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
-                        document.getElementById('coins').textContent = data.coins;
-                        userDices = data.dices;
-                        document.getElementById('dices').textContent = userDices;
-                        if (data.next_replenishment) {
-                            updateNextReplenishment(data.next_replenishment);
-                        }
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
-                });
-            } else {
-                document.getElementById('result').textContent = 'У вас недостаточно кубиков';
-            }
+            fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Roll response:', data);
+                if (data.message) {
+                    document.getElementById('result').textContent = data.message;
+                } else {
+                    document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
+                    document.getElementById('coins').textContent = data.coins;
+                    document.getElementById('dices').textContent = data.dices;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
+            });
         });
     </script>
 </body>
