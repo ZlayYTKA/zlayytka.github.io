@@ -140,32 +140,28 @@
         }
 
         function startTimer(nextReplenishment) {
-            const timerElement = document.getElementById('timer');
+            console.log(`Next replenishment from server: ${nextReplenishment}`);
+
             if (!nextReplenishment) {
-                timerElement.style.display = 'none';
+                console.log('Next replenishment is null or undefined');
                 return;
             }
 
-            clearInterval(timerInterval);
+            const now = new Date();
+            const replenishmentTime = new Date(nextReplenishment);
 
-            function updateTimer() {
-                const now = new Date();
-                const replenishmentTime = new Date(nextReplenishment);
-                const diff = replenishmentTime - now;
+            console.log(`Updating next replenishment with time: ${nextReplenishment}`);
+            console.log(`Время сейчас: ${now}`);
+            console.log(`Replenishment time: ${replenishmentTime}`);
 
-                if (diff <= 0) {
-                    clearInterval(timerInterval);
-                    timerElement.style.display = 'none';
-                    return;
-                }
+            const diff = replenishmentTime - now;
+            console.log(`Time difference: ${diff}`);
 
-                const minutes = Math.floor(diff / 60000);
-                const seconds = Math.floor((diff % 60000) / 1000);
-                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-
-            updateTimer();
-            timerInterval = setInterval(updateTimer, 1000);
+            // Дополнительная информация для отладки
+            console.log(`Now timestamp: ${now.getTime()}`);
+            console.log(`Replenishment timestamp: ${replenishmentTime.getTime()}`);
+            console.log(`Now UTC: ${now.toUTCString()}`);
+            console.log(`Replenishment UTC: ${replenishmentTime.toUTCString()}`);
         }
 
         setTheme();
@@ -186,7 +182,6 @@
         .then(response => response.json())
         .then(data => {
             if (data.authorized) {
-                document.getElementById('auth-status').innerText = 'Да, пользователь авторизован';
                 console.log("Аутентификация успешна!");
                 console.log("Данные пользователя:", data);
                 userToken = data.token;
@@ -196,22 +191,13 @@
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('main-container').style.display = 'block';
 
-                // Проверяем, есть ли next_replenishment и является ли оно допустимой датой
-                if (data.next_replenishment && !isNaN(new Date(data.next_replenishment).getTime())) {
-                    startTimer(data.next_replenishment);
-                } else {
-                    document.getElementById('timer').style.display = 'none';
-                }
+                startTimer(data.next_replenishment);
             } else {
-                document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
             }
-            document.querySelector('.loader').style.display = 'none';
         })
         .catch(error => {
             console.error('Ошибка при авторизации:', error);
-            document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
-            document.querySelector('.loader').style.display = 'none';
         });
 
         document.getElementById('rollDice').addEventListener('click', () => {
