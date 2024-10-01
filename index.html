@@ -171,7 +171,6 @@
         }
 
         function updateTimer(nextReplenishment) {
-            clearInterval(timerInterval);
             if (nextReplenishment) {
                 replenishmentDate = new Date(nextReplenishment + 'Z');
                 requestAnimationFrame(updateTimerDisplay);
@@ -207,6 +206,7 @@
                 userToken = data.token;
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
+
                 setTimeout(() => {
                     updateUserInfo(data);
                 }, 50);
@@ -237,6 +237,7 @@
                     document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
                     document.getElementById('coins').textContent = data.coins;
                     document.getElementById('dices').textContent = data.dices;
+                    updateTimer(data.next_replenishment);
                 }
             })
             .catch(error => {
