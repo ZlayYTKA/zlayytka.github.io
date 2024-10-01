@@ -154,14 +154,19 @@
             userDices = Math.min(userDices + dicesToAdd, maxDices);
             updateDicesDisplay();
 
-            if (userDices === maxDices) {
+            if (userDices < maxDices) {
+                startTimer(new Date(Date.now() + 3 * 60000).toISOString());
+            } else {
                 clearInterval(timerInterval);
                 document.getElementById('timer').style.display = 'none';
             }
         }
 
         function startTimer(nextReplenishment) {
+            console.log(`Next replenishment (UTC): ${nextReplenishment}`);
+
             if (!nextReplenishment) {
+                console.log('Next replenishment is null or undefined');
                 return;
             }
 
@@ -176,7 +181,6 @@
 
                 if (timeLeft <= 0) {
                     addDices();
-                    timerElement.style.display = 'none';
                     return;
                 }
 
@@ -256,6 +260,7 @@
                 }
             })
             .catch(error => {
+                console.error('Ошибка:', error);
                 document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
             });
         });
