@@ -143,13 +143,19 @@
         tg.expand();
 
         function updateTimer(nextReplenishment) {
+            console.log("Next replenishment from server:", nextReplenishment);
             clearInterval(timerInterval);
             if (nextReplenishment) {
+                console.log("Updating next replenishment with time:", nextReplenishment);
                 const timerElement = document.getElementById('timer');
                 timerInterval = setInterval(() => {
                     const now = new Date().getTime();
                     const replenishmentTime = new Date(nextReplenishment).getTime();
                     const difference = replenishmentTime - now;
+
+                    console.log("Время сейчас:", new Date());
+                    console.log("Replenishment time:", new Date(replenishmentTime));
+                    console.log("Time difference:", difference);
 
                     if (difference > 0) {
                         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -161,6 +167,7 @@
                     }
                 }, 1000);
             } else {
+                console.log("Next replenishment is null or undefined");
                 document.getElementById('timer').textContent = '';
             }
         }
@@ -215,7 +222,6 @@
                     document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
                     document.getElementById('coins').textContent = data.coins;
                     document.getElementById('dices').textContent = data.dices;
-                    updateTimer(data.next_replenishment);
                 }
             })
             .catch(error => {
