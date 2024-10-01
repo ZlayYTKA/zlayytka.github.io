@@ -22,14 +22,15 @@
             margin: 0;
             padding: 0;
             height: 100%;
+            width: 100%;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
             background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 64%);
             color: var(--tg-theme-text-color);
             box-sizing: border-box;
+            overflow: hidden;
         }
         .container {
             text-align: center;
@@ -37,12 +38,15 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.5s ease-in-out;
             width: 100%;
             max-width: 600px;
-            box-sizing: border-box;
+            max-height: 90vh;
             overflow-y: auto;
-            max-height: 100vh;
+            box-sizing: border-box;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         h1 {
             color: var(--tg-theme-text-color);
@@ -101,6 +105,7 @@
             font-weight: bold;
             min-height: 30px;
         }
+    </style>
     </style>
 </head>
 <body>
