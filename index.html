@@ -140,56 +140,60 @@
 
         let userLevel, userDices, maxDices;
         let timerInterval;
-
+        let replenishmentTime;
+        
         function updateDicesDisplay() {
             document.getElementById('dices').textContent = userDices;
         }
-
+        
         function calculateMaxDices(level) {
             return Math.min(level * 6, 60);
         }
-
+        
         function addDices() {
             const dicesToAdd = Math.min(userLevel, maxDices - userDices);
             userDices = Math.min(userDices + dicesToAdd, maxDices);
             updateDicesDisplay();
-
+        
             if (userDices < maxDices) {
-                startTimer(new Date(Date.now() + 3 * 60000).toISOString());
+                // Если броски не достигли максимума, обновляем время следующего пополнения
+                replenishmentTime = new Date(Date.now() + 3 * 60000); // 3 минуты для тестирования
+                startTimer(replenishmentTime.toISOString());
             } else {
+                // Если достигнут максимум, останавливаем таймер
                 clearInterval(timerInterval);
                 document.getElementById('timer').style.display = 'none';
             }
         }
-
+        
         function startTimer(nextReplenishment) {
             console.log(`Next replenishment (UTC): ${nextReplenishment}`);
-
+        
             if (!nextReplenishment) {
                 console.log('Next replenishment is null or undefined');
                 return;
             }
-
-            const replenishmentTime = new Date(nextReplenishment + 'Z');
+        
+            replenishmentTime = new Date(nextReplenishment + 'Z');
             const timerElement = document.getElementById('timer');
-
+        
             clearInterval(timerInterval);
-
+        
             function updateTimer() {
                 const now = new Date();
                 const timeLeft = replenishmentTime - now;
-
+        
                 if (timeLeft <= 0) {
                     addDices();
                     return;
                 }
-
+        
                 const minutes = Math.floor(timeLeft / 60000);
                 const seconds = Math.floor((timeLeft % 60000) / 1000);
                 timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 timerElement.style.display = 'block';
             }
-
+        
             updateTimer();
             timerInterval = setInterval(updateTimer, 1000);
         }
