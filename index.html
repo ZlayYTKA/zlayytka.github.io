@@ -140,8 +140,9 @@
         }
 
         function startTimer(nextReplenishment) {
+            const timerElement = document.getElementById('timer');
             if (!nextReplenishment) {
-                document.getElementById('timer').style.display = 'none';
+                timerElement.style.display = 'none';
                 return;
             }
 
@@ -154,13 +155,13 @@
 
                 if (diff <= 0) {
                     clearInterval(timerInterval);
-                    document.getElementById('timer').textContent = "Время пополнения!";
+                    timerElement.style.display = 'none';
                     return;
                 }
 
                 const minutes = Math.floor(diff / 60000);
                 const seconds = Math.floor((diff % 60000) / 1000);
-                document.getElementById('timer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
 
             updateTimer();
@@ -194,7 +195,13 @@
                 document.getElementById('level').textContent = data.level;
                 document.getElementById('auth-container').style.display = 'none';
                 document.getElementById('main-container').style.display = 'block';
-                startTimer(data.next_replenishment);
+
+                // Проверяем, есть ли next_replenishment и является ли оно допустимой датой
+                if (data.next_replenishment && !isNaN(new Date(data.next_replenishment).getTime())) {
+                    startTimer(data.next_replenishment);
+                } else {
+                    document.getElementById('timer').style.display = 'none';
+                }
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
                 console.log("Ошибка аутентификации");
