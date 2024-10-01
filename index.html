@@ -22,8 +22,8 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            width: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
@@ -37,13 +37,10 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease-in-out;
             width: 100%;
             max-width: 600px;
             box-sizing: border-box;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
         h1 {
             color: var(--tg-theme-text-color);
@@ -168,14 +165,13 @@
                 document.getElementById('coins').textContent = data.coins;
                 document.getElementById('dices').textContent = data.dices;
                 document.getElementById('level').textContent = data.level;
-
                 if (data.next_replenishment) {
                     updateNextReplenishment(data.next_replenishment);
                 } else {
                     document.getElementById('next_replenishment_container').style.display = 'none';
                 }
 
-                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
@@ -196,7 +192,6 @@
                     const now = new Date();
                     const replenishmentDate = new Date(nextReplenishmentTime + 'Z');
                     const diff = replenishmentDate.getTime() - now.getTime();
-
                     if (diff > 0) {
                         const minutes = Math.floor(diff / 60000);
                         const seconds = Math.floor((diff % 60000) / 1000);
@@ -229,9 +224,6 @@
                     document.getElementById('result').textContent = `Вам выпало число ${data.roll_result}`;
                     document.getElementById('coins').textContent = data.coins;
                     document.getElementById('dices').textContent = data.dices;
-                    if (data.next_replenishment) {
-                        updateNextReplenishment(data.next_replenishment);
-                    }
                 }
             })
             .catch(error => {
