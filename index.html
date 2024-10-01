@@ -121,7 +121,7 @@
         let userToken = '';
         let userLevel, userDices, maxDices;
         let timerInterval;
-        let replenishmentTime;
+        let remainingSeconds;
 
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
@@ -157,10 +157,7 @@
             console.log(`Добавлено бросков: ${dicesToAdd}. Текущее количество: ${userDices}`);
 
             if (userDices < maxDices) {
-                replenishmentTime = new Date(Date.now() + 3 * 60000);
-                const nextReplenishment = replenishmentTime.toISOString().split('.')[0] + "Z";
-                console.log(`Новое время пополнения: ${nextReplenishment}`);
-                startTimer(nextReplenishment);
+                startTimer(180); // 3 минуты для тестирования
             } else {
                 console.log('Достигнут максимум бросков. Таймер остановлен.');
                 clearInterval(timerInterval);
@@ -168,35 +165,25 @@
             }
         }
 
-        function startTimer(nextReplenishment) {
-            console.log(`Next replenishment (UTC): ${nextReplenishment}`);
-
-            if (!nextReplenishment) {
-                console.log('Next replenishment is null or undefined');
-                return;
-            }
-
-            replenishmentTime = new Date(nextReplenishment);
+        function startTimer(seconds) {
+            console.log(`Запуск таймера на ${seconds} секунд`);
+            remainingSeconds = seconds;
             const timerElement = document.getElementById('timer');
 
             clearInterval(timerInterval);
 
             function updateTimer() {
-                const now = new Date();
-                const timeLeft = replenishmentTime - now;
-
-                console.log(`Текущее время: ${now.toISOString()}, Время пополнения: ${replenishmentTime.toISOString()}, Осталось: ${timeLeft}ms`);
-
-                if (timeLeft <= 0) {
+                if (remainingSeconds <= 0) {
                     console.log('Таймер истек. Добавление бросков.');
                     addDices();
                     return;
                 }
 
-                const minutes = Math.floor(timeLeft / 60000);
-                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
                 timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 timerElement.style.display = 'block';
+                remainingSeconds--;
             }
 
             updateTimer();
@@ -233,7 +220,10 @@
                 document.getElementById('main-container').style.display = 'block';
 
                 if (userDices < maxDices && data.next_replenishment) {
-                    startTimer(data.next_replenishment);
+                    const now = new Date();
+                    const nextReplenishment = new Date(data.next_replenishment);
+                    const secondsLeft = Math.max(0, Math.floor((nextReplenishment - now) / 1000));
+                    startTimer(secondsLeft);
                 }
             } else {
                 console.log("Ошибка аутентификации");
@@ -263,9 +253,10 @@
                     console.log('Ответ сервера:', data);
         
                     if (data.next_replenishment) {
-                        const nextReplenishment = new Date(data.next_replenishment).toISOString().split('.')[0] + "Z";
-                        console.log(`Обработанное время следующего пополнения: ${nextReplenishment}`);
-                        startTimer(nextReplenishment);
+                        const now = new Date();
+                        const nextReplenishment = new Date(data.next_replenishment);
+                        const secondsLeft = Math.max(0, Math.floor((nextReplenishment - now) / 1000));
+                        startTimer(secondsLeft);
                     } else if (userDices === maxDices) {
                         clearInterval(timerInterval);
                         document.getElementById('timer').style.display = 'none';
