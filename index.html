@@ -104,6 +104,14 @@
             font-size: 24px;
             font-weight: bold;
         }
+        #auth-container {
+            transition: transform 0.5s ease-in-out;
+        }
+        #main-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -131,7 +139,7 @@
         let userToken = '';
         let userLevel = 1;
         let userDices = 0;
-        const REPLENISHMENT_INTERVAL = 3 * 60 * 1000;
+        let timerInterval;
 
         function setTheme() {
             document.documentElement.style.setProperty('--tg-color-scheme', tg.colorScheme);
@@ -184,7 +192,13 @@
                 }
 
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
-                document.getElementById('main-container').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('auth-container').style.display = 'none';
+                    document.getElementById('main-container').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('main-container').style.opacity = '1';
+                    }, 50);
+                }, 500);
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
             }
@@ -196,6 +210,7 @@
         });
 
         function updateNextReplenishment(nextReplenishmentTime) {
+            clearInterval(timerInterval);
             const container = document.getElementById('next_replenishment_container');
             const display = document.getElementById('next_replenishment');
 
@@ -210,26 +225,17 @@
                         const seconds = Math.floor((diff % 60000) / 1000);
                         display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                         container.style.display = 'block';
-                        setTimeout(updateTimer, 1000);
                     } else {
-                        replenishDices();
+                        container.style.display = 'none';
+                        clearInterval(timerInterval);
                     }
                 };
 
                 updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
             } else {
                 container.style.display = 'none';
             }
-        }
-
-        function replenishDices() {
-            const maxDices = userLevel * 6;
-            const replenishAmount = Math.min(userLevel, 10);
-            userDices = Math.min(userDices + replenishAmount, maxDices);
-            document.getElementById('dices').textContent = userDices;
-
-            const nextReplenishment = new Date(Date.now() + REPLENISHMENT_INTERVAL).toISOString();
-            updateNextReplenishment(nextReplenishment);
         }
 
         document.getElementById('rollDice').addEventListener('click', () => {
