@@ -168,9 +168,11 @@
                 document.getElementById('dices').textContent = data.dices;
                 document.getElementById('level').textContent = data.level;
 
+                console.log("Next replenishment from server:", data.next_replenishment);
                 if (data.next_replenishment) {
                     updateNextReplenishment(data.next_replenishment);
                 } else {
+                    console.log("No next replenishment data received");
                     document.getElementById('next_replenishment_container').style.display = 'none';
                 }
 
@@ -189,6 +191,7 @@
         });
 
         function updateNextReplenishment(nextReplenishmentTime) {
+            console.log("Updating next replenishment with time:", nextReplenishmentTime);
             const container = document.getElementById('next_replenishment_container');
             const display = document.getElementById('next_replenishment');
 
@@ -197,6 +200,10 @@
                     const now = new Date();
                     const replenishmentDate = new Date(nextReplenishmentTime);
                     const diff = replenishmentDate - now;
+
+                    console.log("Время сейчас:", now);
+                    console.log("Replenishment time:", replenishmentDate);
+                    console.log("Time difference:", diff);
 
                     if (diff > 0) {
                         const minutes = Math.floor(diff / 60000);
@@ -211,6 +218,7 @@
 
                 updateTimer();
             } else {
+                console.log("Время не было предоставлено");
                 container.style.display = 'none';
             }
         }
