@@ -153,9 +153,9 @@
                     const replenishmentTime = new Date(nextReplenishment).getTime();
                     const difference = replenishmentTime - now;
 
-                    console.log("Время сейчас:", new Date());
-                    console.log("Replenishment time:", new Date(replenishmentTime));
-                    console.log("Time difference:", difference);
+                    console.log("Время сейчас (local):", new Date().toLocaleString());
+                    console.log("Replenishment time (UTC):", new Date(replenishmentTime).toUTCString());
+                    console.log("Time difference (ms):", difference);
 
                     if (difference > 0) {
                         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
