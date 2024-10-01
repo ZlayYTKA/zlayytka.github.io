@@ -22,8 +22,8 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            width: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
@@ -37,13 +37,10 @@
             padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.5s ease-in-out;
             width: 100%;
             max-width: 600px;
             box-sizing: border-box;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
         }
         h1 {
             color: var(--tg-theme-text-color);
@@ -175,7 +172,7 @@
                     document.getElementById('next_replenishment_container').style.display = 'none';
                 }
 
-                document.getElementById('auth-container').style.display = 'none';
+                document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
             } else {
                 document.getElementById('auth-status').innerText = 'Нет, пользователь не авторизован';
@@ -187,13 +184,9 @@
             document.querySelector('.loader').style.display = 'none';
         });
 
-        let timerInterval;
-
         function updateNextReplenishment(nextReplenishmentTime) {
             const container = document.getElementById('next_replenishment_container');
             const display = document.getElementById('next_replenishment');
-
-            clearInterval(timerInterval);
 
             if (nextReplenishmentTime) {
                 const updateTimer = () => {
@@ -206,14 +199,13 @@
                         const seconds = Math.floor((diff % 60000) / 1000);
                         display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                         container.style.display = 'block';
+                        setTimeout(updateTimer, 1000);
                     } else {
                         container.style.display = 'none';
-                        clearInterval(timerInterval);
                     }
                 };
 
                 updateTimer();
-                timerInterval = setInterval(updateTimer, 1000);
             } else {
                 container.style.display = 'none';
             }
@@ -240,7 +232,6 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
                 document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
             });
         });
