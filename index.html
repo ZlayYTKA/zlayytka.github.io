@@ -105,6 +105,7 @@
     <div class="container" id="main-container" style="display: none;">
         <div class="user-info">
             <p>Монеты: <span id="coins">0</span> Броски: <span id="dices">0</span></p>
+            <p id="next_replenishment_container" style="display: none;">До следующего броска: <span id="next_replenishment"></span></p>
             <p>Ваш уровень: <span id="level">1</span></p>
         </div>
         <div class="result" id="result"></div>
@@ -162,6 +163,13 @@
                 document.getElementById('coins').textContent = data.coins;
                 document.getElementById('dices').textContent = data.dices;
                 document.getElementById('level').textContent = data.level;
+
+                if (data.next_replenishment) {
+                    updateNextReplenishment(data.next_replenishment);
+                } else {
+                    document.getElementById('next_replenishment_container').style.display = 'none';
+                }
+
                 document.getElementById('auth-container').style.transform = 'translateY(-100%)';
                 document.getElementById('main-container').style.display = 'block';
             } else {
@@ -175,6 +183,33 @@
             document.getElementById('auth-status').innerText = 'Ошибка при проверке авторизации';
             document.querySelector('.loader').style.display = 'none';
         });
+
+        function updateNextReplenishment(nextReplenishmentTime) {
+            const container = document.getElementById('next_replenishment_container');
+            const display = document.getElementById('next_replenishment');
+
+            if (nextReplenishmentTime) {
+                const updateTimer = () => {
+                    const now = new Date();
+                    const replenishmentDate = new Date(nextReplenishmentTime);
+                    const diff = replenishmentDate - now;
+
+                    if (diff > 0) {
+                        const minutes = Math.floor(diff / 60000);
+                        const seconds = Math.floor((diff % 60000) / 1000);
+                        display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                        container.style.display = 'block';
+                        setTimeout(updateTimer, 1000);
+                    } else {
+                        container.style.display = 'none';
+                    }
+                };
+
+                updateTimer();
+            } else {
+                container.style.display = 'none';
+            }
+        }
 
         document.getElementById('rollDice').addEventListener('click', () => {
             fetch('https://zlayytka-nothingcube-backend-ec43.twc1.net/roll', {
