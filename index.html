@@ -187,9 +187,13 @@
             document.querySelector('.loader').style.display = 'none';
         });
 
+        let timerInterval;
+
         function updateNextReplenishment(nextReplenishmentTime) {
             const container = document.getElementById('next_replenishment_container');
             const display = document.getElementById('next_replenishment');
+
+            clearInterval(timerInterval);
 
             if (nextReplenishmentTime) {
                 const updateTimer = () => {
@@ -202,13 +206,14 @@
                         const seconds = Math.floor((diff % 60000) / 1000);
                         display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                         container.style.display = 'block';
-                        setTimeout(updateTimer, 1000);
                     } else {
                         container.style.display = 'none';
+                        clearInterval(timerInterval);
                     }
                 };
 
                 updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
             } else {
                 container.style.display = 'none';
             }
@@ -223,7 +228,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Roll response:', data);
                 if (data.message) {
                     document.getElementById('result').textContent = data.message;
                 } else {
