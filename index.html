@@ -114,7 +114,7 @@
         <div class="result" id="result"></div>
         <div class="button-grid">
             <button class="button" id="rollDice">Бросить кубик</button>
-            <button class="button">Пока ничего</button>
+            <button class="button" id="levelUp">Повысить уровень</button>
             <button class="button">Пока ничего</button>
             <button class="button">Пока ничего</button>
         </div>
@@ -243,6 +243,29 @@
             .catch(error => {
                 console.error('Ошибка:', error);
                 document.getElementById('result').textContent = 'Произошла ошибка при броске кубика';
+            });
+        });
+
+        document.getElementById('levelUp').addEventListener('click', () => {
+            fetch('https://zlayytka-nothingcube-backend-eb65.twc1.net/increase_level', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${userToken}`,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('result').textContent = data.error;
+                } else {
+                    document.getElementById('result').textContent = `Уровень повышен до ${data.new_level}!`;
+                    document.getElementById('coins').textContent = data.remaining_coins;
+                    document.getElementById('level').textContent = data.new_level;
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.getElementById('result').textContent = 'Произошла ошибка при повышении уровня';
             });
         });
     </script>
