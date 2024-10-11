@@ -255,12 +255,12 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.error) {
-                    document.getElementById('result').textContent = data.error;
-                } else {
+                if (data.success) {
                     document.getElementById('result').textContent = `Уровень повышен до ${data.new_level}!`;
                     document.getElementById('coins').textContent = data.remaining_coins;
                     document.getElementById('level').textContent = data.new_level;
+                } else {
+                    document.getElementById('result').textContent = data.message || 'Не удалось повысить уровень';
                 }
             })
             .catch(error => {
