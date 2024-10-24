@@ -1,0 +1,7 @@
+{
+  "homepage": "https://zlayytka.github.io",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  }
+}
