@@ -1,0 +1,105 @@
+.level-item {
+  width: 100%;
+  height: 88px;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.level-icon-frame {
+  position: absolute;
+  width: 49px;
+  height: 48px;
+  left: 19px;
+  top: 0;
+}
+
+.level-icon {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  left: 8px;
+  top: 8.5px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.level-title {
+  position: absolute;
+  left: 72px;
+  top: 17px;
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 120%;
+  display: flex;
+  align-items: center;
+}
+
+.level-info {
+  position: absolute;
+  width: calc(100% - 38px);
+  height: 40px;
+  left: 19px;
+  top: 48px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-item.bought .level-title {
+  color: #457B9D;
+}
+
+.level-item.bought .level-info {
+  background: rgba(13, 79, 132, 0.01);
+  box-shadow: inset 0px 4px 16.3px rgba(0, 0, 0, 0.5);
+}
+
+.level-item.bought .level-status {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  color: #457B9D;
+}
+
+.level-item.available .level-title {
+  color: #A8DADC;
+}
+
+.level-item.available .level-info {
+  background: #A8DADC;
+}
+
+.level-item.available .price {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #0D4F84;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+}
+
+.level-item.locked .level-title {
+  color: #A8DADC;
+}
+
+.level-item.locked .level-info {
+  background: #457B9D;
+}
+
+.level-item.locked .price {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #F1FAEE;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  opacity: 0.5;
+}

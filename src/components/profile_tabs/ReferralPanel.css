@@ -1,0 +1,241 @@
+.referral-panel {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  height: 197px;
+  max-width: 500px;
+  margin: 20px auto 0;
+  background: rgba(29, 53, 87, 0.01);
+  border: 1px solid #000000;
+  box-shadow: inset 0px 4px 131.9px #000000;
+  border-radius: 50px;
+}
+
+.referral-info-button {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  left: 24px;
+  top: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 2;
+}
+
+.referral-info-button svg {
+  width: 100%;
+  height: 100%;
+  color: #457B9D;
+}
+
+.referral-button {
+  position: absolute;
+  width: 197px;
+  height: 197px;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.referral-avatar-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.referral-avatar {
+  box-sizing: border-box;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #43E1FF;
+  border: 3px solid #457B9D;
+  border-radius: 200px;
+  overflow: hidden;
+}
+
+.referral-avatar svg {
+  width: 100%;
+  height: 100%;
+}
+
+.referral-avatar-blur {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(13, 79, 132, 0.01);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-radius: 200px;
+  z-index: 1;
+}
+
+.referral-plus-icon {
+  position: absolute;
+  left: 25.38%;
+  right: 25.89%;
+  top: 25.38%;
+  bottom: 25.89%;
+  z-index: 2;
+}
+
+.referral-plus-icon svg {
+  width: 100%;
+  height: 100%;
+  color: #FFFFFF;
+}
+
+/* Модальное окно */
+.referral-modal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1000;
+  visibility: hidden;
+}
+
+.referral-modal.active {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.modal-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.referral-modal.active .modal-overlay {
+  opacity: 1;
+}
+
+.referral-modal.closing .modal-overlay {
+  opacity: 0;
+}
+
+.modal-blue-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 320px;
+  background: #039CFF;
+  border-radius: 50px 50px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-dark-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 310px;
+  background: #092349;
+  border-radius: 50px 50px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+
+.referral-modal.active .modal-blue-panel,
+.referral-modal.active .modal-dark-panel {
+  transform: translateY(0);
+}
+
+.referral-modal.closing .modal-blue-panel {
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
+}
+
+.referral-modal.closing .modal-dark-panel {
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-close-button {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  right: 24px;
+  top: 24px;
+  background: #1D3557;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 24px;
+  right: 24px;
+  transform: translateY(-40%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.referral-link-input {
+  width: 100%;
+  height: 56px;
+  background: rgba(69, 123, 157, 0.1);
+  border: 1px solid #457B9D;
+  border-radius: 10px;
+  color: #FFFFFF;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 20px;
+  text-align: center;
+  outline: none;
+}
+
+.modal-button {
+  width: 100%;
+  height: 56px;
+  padding: 10px;
+  background: #A8DADC;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Montserrat';
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 120%;
+  color: #092349;
+  transition: all 0.3s ease;
+}
+
+.modal-button:hover {
+  opacity: 0.9;
+}
+
+.modal-button.copied {
+  background: #66c2c4;
+  animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
