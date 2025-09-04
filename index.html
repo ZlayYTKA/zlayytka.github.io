@@ -1,14 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Telegram Web App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script type="module" crossorigin src="/assets/index-DNAgTg3W.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DpR4XwJa.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>План разработки — GitHub Pages (статический)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="row">
+      <div class="title">План разработки (12 недель, 60 рабочих дней)</div>
+      <div class="kpi"><span class="badge">Всего задач: <strong id="kAll">0</strong></span></div>
+      <div class="kpi"><span class="badge">Готово: <strong id="kDone">0</strong></span></div>
+    </div>
+    <div class="controls">
+      <input id="q" type="search" placeholder="Поиск…" />
+      <select id="weekFilter" class="select"><option value="all">Все недели</option></select>
+      <select id="epicFilter" class="select"><option value="all">Все эпики</option></select>
+      <span class="badge">Прогресс: <strong id="kPct">0%</strong></span>
+      <div id="themeMount"></div>
+      <button id="reset" class="btn">Сбросить статусы</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="row" style="justify-content:space-between;gap:12px">
+        <div style="font-weight:700">Синхронизация статусов</div>
+        <div class="badge">Работает без сервера (GitHub Pages)</div>
+      </div>
+      <div class="grid2" style="margin-top:10px">
+        <div>
+          <div class="row" style="margin-bottom:6px"><strong>1) Сгенерировать код (для программиста)</strong></div>
+          <div class="row" style="gap:6px">
+            <button id="gen" class="btn">Сгенерировать код</button>
+            <button id="copy" class="btn">Копировать</button>
+          </div>
+          <textarea id="codeOut" class="input" rows="3" placeholder="Нажмите «Сгенерировать код»" style="width:100%;margin-top:8px"></textarea>
+          <input id="linkOut" class="input" type="text" placeholder="Или ссылка с кодом (#code=…)" style="width:100%;margin-top:6px" />
+          <div class="badge" style="margin-top:6px">Код содержит только отметки «выполнено/не выполнено»</div>
+        </div>
+        <div>
+          <div class="row" style="margin-bottom:6px"><strong>2) Применить код (для менеджера)</strong></div>
+          <input id="codeIn" class="input" type="text" placeholder="Вставьте код сюда" style="width:100%" />
+          <div class="row" style="margin-top:6px"><button id="apply" class="btn">Применить код</button></div>
+          <div class="badge" style="margin-top:6px">Можно также открыть ссылку с хэшем: …/index.html#code=ВАШ_КОД</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="app" class="container"></section>
+  </main>
+
+  <div class="footer">Статусы локально в браузере (localStorage). Для обмена — используйте код выше.</div>
+
+  <script src="tasks.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
